@@ -1,4 +1,4 @@
-# Wire.js
+# Wire.js &nbsp; [![npm version](https://img.shields.io/npm/v/wire.svg?style=flat)](https://www.npmjs.com/package/wire) [![CircleCI](https://circleci.com/gh/callumlocke/wire.svg?style=shield)](https://circleci.com/gh/callumlocke/wire)
 
 Wire is an experimental build toolkit aiming to make this possible:
 
