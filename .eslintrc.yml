@@ -1,0 +1,17 @@
+root: true
+parser: babel-eslint
+extends: [airbnb, plugin:flowtype/recommended]
+plugins: [babel, flowtype]
+settings:
+  flowtype:
+    onlyFilesWithFlowAnnotation: true
+rules:
+  no-await-in-loop: off
+  no-restricted-syntax: [error, ForInStatement, LabeledStatement, WithStatement]
+  no-unused-expressions: error
+  no-lone-blocks: off
+  no-continue: off
+  semi: [error, never]
+  semi-style: [error, first]
+  no-underscore-dangle: off
+  max-len: off
