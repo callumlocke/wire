@@ -37,6 +37,10 @@ jobs:
           command: npm test
           when: always
 
+      - run:
+          name: Build
+          command: npm run build
+
       - deploy:
           name: Maybe publish to npm
           command: |
