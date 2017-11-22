@@ -1,7 +1,7 @@
 // @flow
 
 import * as Immutable from 'immutable'
-import { castFilemap } from '../src'
+import { castFilemap } from '..'
 
 test('castFilemap()', () => {
   const files = castFilemap({

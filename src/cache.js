@@ -6,7 +6,7 @@ import Bluebird from 'bluebird'
 import JoinTable from 'join-table'
 import diff from './diff'
 import castFilemap from './castFilemap'
-import type { GranularBuildFunction, AsyncTransform, Filemap } from './types'
+import type { GranularBuildFunction, AsyncTransform, Filemap } from '.'
 
 /**
  * cache()

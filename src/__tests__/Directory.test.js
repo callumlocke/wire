@@ -7,8 +7,8 @@ import del from 'del'
 import tempy from 'tempy'
 import Bluebird from 'bluebird'
 import mkdirp from 'mkdirp-promise'
-import { diff, Directory } from '../src'
-import type { Filemap } from '../src'
+import { diff, Directory } from '..'
+import type { Filemap } from '..'
 
 const writeFile = promisify(fs.writeFile)
 

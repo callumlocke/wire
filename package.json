@@ -29,6 +29,7 @@
     "babel-preset-env": "^1.6.1",
     "babel-preset-flow": "^6.23.0",
     "del": "^3.0.0",
+    "del-cli": "^1.1.0",
     "eslint": "^4.11.0",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-babel": "^4.1.2",
@@ -42,13 +43,16 @@
     "jest": "^21.2.1",
     "pretty-hrtime": "^1.0.3"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "license": "MIT",
   "main": "dist",
   "repo": "callumlocke/wire",
   "scripts": {
-    "build": "babel src --out-dir dist",
+    "build": "npm run clean && babel src --out-dir dist --ignore '**/__tests__/**'",
     "check-types": "flow",
+    "clean": "del dist",
     "lint": "eslint .",
     "test": "jest"
   }

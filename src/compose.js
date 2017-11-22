@@ -1,7 +1,7 @@
 // @flow
 
 import { Map as ImmutableMap } from 'immutable'
-import type { PermissiveTransform, LooseTransform } from './types'
+import type { PermissiveTransform, LooseTransform } from '.'
 import { castFilemap } from '.'
 
 /**
