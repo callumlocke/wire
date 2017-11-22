@@ -1,0 +1,53 @@
+{
+  "name": "wire",
+  "version": "1.0.0",
+  "author": "Callum Locke",
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "chalk": "^2.3.0",
+    "filesize-parser": "^1.4.1",
+    "immutable": "^4.0.0-rc.9",
+    "invariant": "^2.2.2",
+    "join-table": "^3.0.2",
+    "lodash": "^4.17.4",
+    "minimatch": "^3.0.4",
+    "mkdirp-promise": "^5.0.1",
+    "pretty-bytes": "^4.0.2",
+    "resolve-from": "^4.0.0",
+    "sane": "^2.2.0",
+    "stack-trace": "0.0.10",
+    "subdir": "0.0.3",
+    "tempy": "^0.2.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^8.0.2",
+    "babel-helpers": "^6.24.1",
+    "babel-jest": "^21.2.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-flow": "^6.23.0",
+    "del": "^3.0.0",
+    "eslint": "^4.11.0",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-babel": "^4.1.2",
+    "eslint-plugin-flowtype": "^2.39.1",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-jsx-a11y": "^6.0.2",
+    "eslint-plugin-react": "^7.5.1",
+    "flow-bin": "^0.59.0",
+    "flow-typed": "^2.2.3",
+    "hard-rejection": "^1.0.0",
+    "jest": "^21.2.1",
+    "pretty-hrtime": "^1.0.3"
+  },
+  "license": "MIT",
+  "repo": "callumlocke/wire",
+  "scripts": {
+    "build": "babel src --out-dir dist",
+    "check-types": "flow",
+    "lint": "eslint .",
+    "test": "jest"
+  }
+}
