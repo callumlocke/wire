@@ -41,6 +41,6 @@ jobs:
           name: Maybe publish to npm
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              echo -e "$NPM_USERNAME\n$NPM_PASSWORD\n$NPM_EMAIL" | npm login
-              ./node_modules/.bin/publish
+              echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
+              npm publish
             fi
