@@ -27,7 +27,16 @@ import type {
   PluginFunction,
 } from './types'
 
-export { cache, castFilemap, compose, createMatcher, diff, Directory, singleFile, withSubset }
+export {
+  cache,
+  castFilemap,
+  compose,
+  createMatcher,
+  diff,
+  Directory,
+  singleFile,
+  withSubset,
+}
 
 export type {
   Filemap,
