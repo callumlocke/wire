@@ -8,7 +8,12 @@ settings:
 rules:
   no-await-in-loop: off
   no-restricted-syntax: [error, ForInStatement, LabeledStatement, WithStatement]
-  no-unused-expressions: error
+  no-unused-expressions: off
+  flowtype/no-unused-expressions:
+    - error
+    - allowShortCircuit: false
+      allowTernary: false
+      allowTaggedTemplates: false
   no-lone-blocks: off
   no-continue: off
   semi: [error, never]

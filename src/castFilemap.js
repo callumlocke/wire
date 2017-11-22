@@ -1,9 +1,7 @@
 // @flow
 
 import path from 'path'
-// import invariant from 'invariant';
 import * as Immutable from 'immutable'
-// import _ from 'lodash';
 
 import type { Filemap } from './types'
 
@@ -41,7 +39,6 @@ const castFilemap = (files?: any): Filemap => {
     throw new TypeError('Expected files to be an Immutable Map or a plain object')
   }
 
-  // eslint-disable-next-line no-unused-expressions
   (result: Immutable.Map<string, Buffer | string>)
 
   // cast values to buffers
@@ -53,8 +50,6 @@ const castFilemap = (files?: any): Filemap => {
 
   // cast keys to normalized file paths
   result = result.mapKeys(path.normalize)
-
-  // eslint-disable-next-line no-unused-expressions
   ;(result: Filemap)
 
   memo.add(result)
