@@ -2,7 +2,7 @@
 
 import prettyHRTime from 'pretty-hrtime'
 import Bluebird from 'bluebird'
-import { cache, diff, castFilemap } from '../src'
+import { cache, diff, castFilemap } from '..'
 
 /**
  * Helper to sort an array of calls (to a Jest mock function) so they may be compared for equality

@@ -1,4 +1,4 @@
-import { diff, withSubset } from '../src'
+import { diff, withSubset } from '..'
 
 test('withSubset()', async () => {
   const transform = withSubset('foo/**', files =>

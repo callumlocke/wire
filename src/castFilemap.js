@@ -2,8 +2,7 @@
 
 import path from 'path'
 import * as Immutable from 'immutable'
-
-import type { Filemap } from './types'
+import type { Filemap } from '.'
 
 const memo: WeakSet<Filemap> = new WeakSet()
 

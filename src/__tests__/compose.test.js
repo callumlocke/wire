@@ -1,6 +1,6 @@
 // @flow
 
-import { compose } from '../src'
+import { compose } from '..'
 
 test('compose() function', async () => {
   const transform = compose(
