@@ -42,7 +42,9 @@
     "jest": "^21.2.1",
     "pretty-hrtime": "^1.0.3"
   },
+  "files": ["dist"],
   "license": "MIT",
+  "main": "dist",
   "repo": "callumlocke/wire",
   "scripts": {
     "build": "babel src --out-dir dist",
