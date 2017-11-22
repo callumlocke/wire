@@ -36,6 +36,7 @@
     "babel-preset-flow": "^6.23.0",
     "del": "^3.0.0",
     "del-cli": "^1.1.0",
+    "documentation": "^5.3.3",
     "eslint": "^4.11.0",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-babel": "^4.1.2",
@@ -57,11 +58,13 @@
   "main": "lib",
   "repo": "callumlocke/wire",
   "scripts": {
-    "build": "npm run clean && babel src --out-dir lib --ignore '**/__tests__/**'",
+    "build": "del lib && babel src --out-dir lib --ignore '**/__tests__/**'",
+    "build:tmp": "del tmp && PRESERVE_MODULE_SYNTAX=1 PRESERVE_FLOW_ANNOTATIONS=1 babel src --out-dir tmp --ignore '**/__tests__/**'",
     "check-types": "flow",
-    "clean": "del lib",
     "lint": "eslint .",
-    "prepublish": "npm run build && flow-copy-source --verbose --ignore '**/__tests__/**' src lib",
+    "create-docs": "npm run build:tmp && documentation build src --format html --output docs",
+    "create-flow-files": "npm run build:tmp && flow-copy-source --verbose --ignore '**/__tests__/**' tmp lib",
+    "prepublish": "npm run build && npm run create-flow-files",
     "test": "jest"
   }
 }
