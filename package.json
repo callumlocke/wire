@@ -2,7 +2,6 @@
   "name": "wire",
   "version": "1.0.0",
   "author": "Callum Locke",
-  "repo": "callumlocke/wire",
   "dependencies": {
     "bluebird": "^3.5.1",
     "chalk": "^2.3.0",
@@ -43,10 +42,12 @@
     "jest": "^21.2.1",
     "pretty-hrtime": "^1.0.3"
   },
+  "license": "MIT",
+  "repo": "callumlocke/wire",
   "scripts": {
     "build": "babel src --out-dir dist",
-    "lint": "eslint .",
     "check-types": "flow",
+    "lint": "eslint .",
     "test": "jest"
   }
 }
