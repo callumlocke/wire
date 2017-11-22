@@ -2,6 +2,11 @@
   "name": "wire",
   "version": "1.1.1",
   "author": "Callum Locke",
+  "babel": {
+    "presets": [
+      "./babel-config.js"
+    ]
+  },
   "dependencies": {
     "bluebird": "^3.5.1",
     "chalk": "^2.3.0",
@@ -24,6 +29,7 @@
     "babel-eslint": "^8.0.2",
     "babel-helpers": "^6.24.1",
     "babel-jest": "^21.2.0",
+    "babel-plugin-syntax-flow": "^6.18.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.6.1",
