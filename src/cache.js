@@ -4,8 +4,7 @@ import path from 'path'
 import invariant from 'invariant'
 import Bluebird from 'bluebird'
 import JoinTable from 'join-table'
-import diff from './diff'
-import castFilemap from './castFilemap'
+import { castFilemap, diff, singleFile } from '.'
 import type { GranularBuildFunction, AsyncTransform, Filemap } from '.'
 
 /**
