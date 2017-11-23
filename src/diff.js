@@ -7,6 +7,10 @@ import type { FilemapLike, FilemapPatch } from '.'
 
 type SetOfFilenames = Immutable.Set<string>
 
+/**
+ * Find out the differences between two filemaps.
+ */
+
 const diff = (_input: FilemapLike, _output: FilemapLike): FilemapPatch => {
   const input = castFilemap(_input)
   const output = castFilemap(_output)

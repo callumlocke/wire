@@ -1,9 +1,19 @@
-import { identity } from 'lodash'
+// @flow
 
 import { compose, castFilemap, createMatcher } from '../src'
+import type { Matchable, Transform, AsyncTransform } from '.'
 
-export default function withSubset(pattern, ...transforms) {
-  if (!transforms.length) return identity
+/**
+ * Creates an asynchronous transform that will apply the given `transforms` to only a subset of
+ * incoming files. Files outside this subset are kept aside and then recombined with the output
+ * files at the end before finally returning them.
+ */
+
+export default function withSubset(
+  pattern: Matchable,
+  ...transforms: Transform[]
+): AsyncTransform {
+  if (!transforms.length) return async files => files
 
   // precompile a matcher for repeat unselected
   const match = createMatcher(pattern)
@@ -12,9 +22,9 @@ export default function withSubset(pattern, ...transforms) {
   const transform = compose(...transforms)
 
   // return a transform that only operates on files that match the matcher
-  return async (_files) => {
-    const files = castFilemap(_files).toObject()
-    const names = Object.keys(files)
+  return async (files) => {
+    const filesObject = castFilemap(files).toObject()
+    const names = Object.keys(filesObject)
     const count = names.length
 
     // sort them into selected and unselected
@@ -23,7 +33,7 @@ export default function withSubset(pattern, ...transforms) {
     for (let i = 0; i < count; i += 1) {
       const name = names[i]
       const group = match(name) ? selectedFiles : unselectedFiles
-      group[name] = files[name]
+      group[name] = filesObject[name]
     }
 
     // transform the selected subset

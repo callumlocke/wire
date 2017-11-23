@@ -1,8 +1,10 @@
 // @flow
 
 /**
- * Creates a transform that allows your callback to modify files on disk. Good for wiring up CLI
- * tools that expect to work on real files on disk.
+ * Creates a transform that allows your callback to modify real files on disk. Good for wiring up
+ * CLI tools that are designed to work with a real directory structure.
+ *
+ *
  *
  * Important: your callback must not modify anything in the input directory, or everything will
  * break.
@@ -17,8 +19,7 @@
 
 import path from 'path'
 import tempy from 'tempy'
-import Directory from './Directory'
-import singleFile from './singleFile'
+import { Directory, singleFile } from '.'
 
 const tmp = (callback: (input: string, output: string) => void) => {
   const tmpDir = tempy.directory()

@@ -9,16 +9,16 @@ import castFilemap from './castFilemap'
 import type { GranularBuildFunction, AsyncTransform, Filemap } from '.'
 
 /**
- * cache()
+ * Returns an async transform that, when passed a filemap, runs your callback once for every file
+ * in the filemap. Your callback decides what to output on behalf of the given file – it may output
+ * the file as-is, or a buffer/string of new contents to replace the file, or `null` to exclude
+ * that file from the output, or a plain object detailing new files to output instead.
  *
- * Returns an async transform that, when passed a filemap, runs your callback for every file in the
- * filemap. Your callback decides what to output on behalf of the given file – it may output the
- * file as-is, or a buffer/string of new contents to replace the file, or `null` to exclude that
- * file from the output, or a plain object detailing new files to output instead.
+ * The returned transform retains a memo of which output files were triggered by which input files on each invocation. It uses this, in combination with a diff comparing the incoming filemap to the incoming filemap from the previous invocation, to determine which files actually need to be built again. In many cases it's just one or two files, and their results are simply combined with the output from the previous invocation.
  *
- * @param  {GranularBuildFunction} fn
- * @return {AsyncTransform}
+ * @public
  */
+
 const cache = (fn: GranularBuildFunction): AsyncTransform => {
   let importations = new JoinTable()
   let dependencies = new JoinTable()

@@ -16,6 +16,12 @@ const compileGlobMatcher = (glob, options) => {
   return fn
 }
 
+/**
+ * Creates a function that can be used repeatedly to check if a filename matches certain criteria.
+ *
+ * @public
+ */
+
 const createMatcher = (
   pattern: Matchable = '**',
   _options?: Object,

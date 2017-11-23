@@ -31,6 +31,12 @@ const defaults = {
   logWatchErrors: true,
 }
 
+/**
+ * Slightly hacky. After `file` has been deleted, this is called to also delete its directory if
+ * that directory is now empty. Continues deleting parent directories until it encounters one that
+ * is not empty.
+ */
+
 async function pruneEmptyAncestors(file, until) {
   if (until === file || !subdir(until, file)) return
 
@@ -139,17 +145,34 @@ async function reprime(dir) {
 let queueableMethods // eslint-disable-line prefer-const
 
 /**
- * A Directory instance represents a real directory on disk and acts as an
- * in-memory cache of its entire contents.
+ * A `Directory` instance represents a real directory on disk and acts as an in-memory cache of its
+ * entire contents.
+ *
+ * @public
  */
 
 export default class Directory extends EventEmitter {
+  /**
+   * Reads the contents of the directory, recursively, but cached.
+   *
+   * @public
+   */
+
   read: (incomingFiles?: Filemap) => Promise<Filemap>
+
+  /**
+   * Writes the given files to the directory.
+   *
+   * @public
+   */
+
   write: FilemapLike => Promise<Filemap>
+
   watch: (
     subscriber: (Filemap) => any,
     options?: { [string]: any },
   ) => Promise<void>
+
   close: () => Promise<void>
 
   _absolutePath: string
@@ -225,10 +248,6 @@ export default class Directory extends EventEmitter {
 
 // these methods could live inside the class block if decorators were a thing...
 queueableMethods = {
-  /**
-   * Reads the contents of the directory, recursively, but cached.
-   */
-
   async read(incomingFiles) {
     const dir = this // until babel bugs resolved
 
