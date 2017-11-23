@@ -62,7 +62,7 @@
     "build:tmp": "del tmp && PRESERVE_MODULE_SYNTAX=1 PRESERVE_FLOW_ANNOTATIONS=1 babel src --out-dir tmp --ignore '**/__tests__/**'",
     "check-types": "flow",
     "lint": "eslint .",
-    "create-docs": "npm run build:tmp && documentation build src --format html --output docs",
+    "create-docs": "documentation build src --format html --output docs",
     "create-flow-files": "npm run build:tmp && flow-copy-source --verbose --ignore '**/__tests__/**' tmp lib",
     "prepublish": "npm run build && npm run create-flow-files",
     "test": "jest"
