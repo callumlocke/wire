@@ -10,8 +10,7 @@
 
 import path from 'path'
 import tempy from 'tempy'
-import Directory from './Directory'
-import singleFile from './singleFile'
+import { Directory, singleFile } from '.'
 
 const tmp = (callback: (input: string, output: string) => void) => {
   const tmpDir = tempy.directory()

@@ -1,6 +1,6 @@
 // @flow
 
-import { compose, castFilemap, createMatcher } from '../src'
+import { compose, castFilemap, createMatcher } from '.'
 import type { Matchable, Transform, AsyncTransform } from '.'
 
 /**
