@@ -1,7 +1,8 @@
 [ignore]
 <PROJECT_ROOT>/lib/.*
 <PROJECT_ROOT>/tmp/.*
-<PROJECT_ROOT>/node_modules.*/fbjs/.*
+; <PROJECT_ROOT>/node_modules.*/fbjs/.*
+<PROJECT_ROOT>/node_modules.*/documentation/__tests__/fixture/config-malformed.json
 
 [include]
 
