@@ -27,10 +27,10 @@ const castFilemap = (files?: any): Filemap => {
 
   let result
 
-  if (Immutable.Map.isMap(files)) {
-    // return fast if we know it's a filemap already
-    if (memo.has(files)) return files
+  // return fast if we know it's a filemap already
+  if (memo.has(files)) return files
 
+  if (Immutable.Map.isMap(files)) {
     result = files
   } else if (typeof files === 'object') {
     result = Immutable.Map(files)
