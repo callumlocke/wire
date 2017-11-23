@@ -16,11 +16,25 @@ const compileGlobMatcher = (glob, options) => {
   return fn
 }
 
+const memo: WeakSet<Matcher> = new WeakSet()
+
+/**
+ * Creates a function that can be used repeatedly to check if a filename matches certain criteria.
+ *
+ * @public
+ */
+
 const createMatcher = (
   pattern: Matchable = '**',
   _options?: Object,
 ): Matcher => {
+  if (!_options && typeof pattern === 'function' && memo.has(pattern)) {
+    return pattern
+  }
+
   const options = { ...defaults, ..._options }
+
+  let matcher
 
   switch (pattern) {
     case false:
@@ -30,17 +44,11 @@ const createMatcher = (
       throw new Error('wire createMatcher: pattern cannot be an empty string')
 
     default: {
-      const mmOptions = {
-        dot: options.dot,
-        // unixify: false,
-      }
+      const mmOptions = { dot: options.dot }
 
       if (typeof pattern === 'string') {
-        return compileGlobMatcher(pattern, mmOptions)
-        // return micromatch.matcher(pattern, mmOptions);
-      }
-
-      if (Array.isArray(pattern)) {
+        matcher = compileGlobMatcher(pattern, mmOptions)
+      } else if (Array.isArray(pattern)) {
         // return a fast function mimicking multimatch behaviour
 
         const l = pattern.length
@@ -51,12 +59,12 @@ const createMatcher = (
           const p = pattern[i]
 
           if (typeof p !== 'string') {
-            throw new TypeError('wire createMatcher: when pattern is an array, it must contain only strings.')
+            throw new TypeError('wire: createMatcher: When pattern is an array, it must contain only strings.')
           }
 
           if (p.charAt(0) === '!') {
             if (i === 0) {
-              throw new Error('wire createMatcher: first glob in an array cannot be negative.')
+              throw new Error('wire createMatcher: First glob in an array cannot be negative.')
             }
 
             posNeg[i] = false
@@ -69,7 +77,7 @@ const createMatcher = (
           }
         }
 
-        return (name) => {
+        matcher = (name) => {
           let matched = false
 
           for (let i = 0; i < l; i += 1) {
@@ -80,19 +88,19 @@ const createMatcher = (
 
           return matched
         }
+      } else if (typeof pattern === 'function') {
+        matcher = name => Boolean(pattern(name))
+      } else if (pattern instanceof RegExp) {
+        matcher = name => pattern.test(name)
+      } else {
+        throw new TypeError(`wire createMatcher: Unexpected pattern type: ${typeof pattern}`)
       }
-
-      if (typeof pattern === 'function') {
-        return name => Boolean(pattern(name))
-      }
-
-      if (pattern instanceof RegExp) {
-        return name => pattern.test(name)
-      }
-
-      throw new TypeError(`wire createMatcher: Unexpected pattern type: ${typeof pattern}`)
     }
   }
+
+  memo.add(matcher)
+
+  return matcher
 }
 
 export default createMatcher

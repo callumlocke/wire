@@ -17,7 +17,7 @@ const blank = Immutable.Map()
  * - The result is returned as an Immutable Map.
  *
  * Uses weak memoization so there is virtually zero performance penalty to re-casting something
- * that's already a filemap. Therefore there is no need for an `isFilemap` function.
+ * that's already a filemap. So you should never inspect an object first to check if it's a filemap.
  *
  * @public
  */
@@ -27,10 +27,10 @@ const castFilemap = (files?: any): Filemap => {
 
   let result
 
-  if (Immutable.Map.isMap(files)) {
-    // return fast if we know it's a filemap already
-    if (memo.has(files)) return files
+  // return fast if we know it's a filemap already
+  if (memo.has(files)) return files
 
+  if (Immutable.Map.isMap(files)) {
     result = files
   } else if (typeof files === 'object') {
     result = Immutable.Map(files)
