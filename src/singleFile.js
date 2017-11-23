@@ -1,15 +1,14 @@
 // @flow
 
 /**
- * Wraps an async function in such a way that its invocations are guaranteed to be
- * ‘[single file](https://en.wiktionary.org/wiki/single_file)’ (one by one).
+ * Wraps an async function such that its invocations are guaranteed to be ‘[single file](https://en.wiktionary.org/wiki/single_file)’ (one by one).
  *
  * That is, if you make multiple, concurrent calls to the resulting function, they are automatically
  * queued up and passed through your inner function **one at a time** – each new invocation may only
  * begin once the previous async invocation has settled (i.e. once the promise returned by the
  * previous invocation has been fulfilled or rejected).
  *
- * This is used internally by Wire's `tmp` function. It's exported in case it's useful elsewhere.
+ * This is used internally by Wire's `tmp` and `cache` functions.
  *
  * NB. this may be used to wrap a synchronous function too, but there is probably no point because
  * non-recursive synchronous invocations can never overlap in single-threaded JavaScript anyway.
