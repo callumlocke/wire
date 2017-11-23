@@ -2,7 +2,7 @@
 
 /**
  * Wraps an async function in such a way that its invocations are guaranteed to be
- * [single file](https://en.wiktionary.org/wiki/single_file) (one at a time).
+ * ‘[single file](https://en.wiktionary.org/wiki/single_file)’ (one by one).
  *
  * That is, if you make multiple, concurrent calls to the resulting function, they are automatically
  * queued up and passed through your inner function **one at a time** – each new invocation may only
@@ -21,8 +21,8 @@ export default function singleFile<Args: Array<any>, ReturnValue: any>(
 ): (...args: Args) => Promise<ReturnValue> {
   let queue = Promise.resolve()
 
-  return (...args) => {
-    const call = () => fn.apply(context, args)
+  return function singleFileWrapper(...args) {
+    const call = () => fn.apply(this === undefined ? context : this, args)
 
     queue = queue.then(call, call)
 
