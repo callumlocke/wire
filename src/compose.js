@@ -5,12 +5,10 @@ import type { PermissiveTransform, LooseTransform } from '.'
 import { castFilemap } from '.'
 
 /**
- * Compose a list of transforms into a single transform that runs as an
- * asynchronous series of steps.
+ * Compose a list of transforms into a single transform that runs as an asynchronous series of
+ * steps.
  *
- * Also casts to filemap before and after each step, so the transforms may be
- * 'loose' if need be.
- *
+ * Also casts to filemap before and after each step, so your transforms may be 'loose' if need be.
  * @public
  */
 
