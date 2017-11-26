@@ -9,7 +9,7 @@ const pkg = require('../package.json')
 
 const projectRoot = path.resolve(__dirname, '..')
 
-// Do this asynchronously
+//
 ;(async () => {
   let versions
 
@@ -23,7 +23,7 @@ const projectRoot = path.resolve(__dirname, '..')
   }
 
   if (versions.indexOf(pkg.version) === -1) {
-    await execa('npm', ['publish'], { cwd: projectRoot })
+    await execa('npm', ['publish'], { cwd: projectRoot, stdio: 'inherit' })
   } else {
     console.log(`Version ${pkg.version} is already on npm; skipping publish.`)
   }
