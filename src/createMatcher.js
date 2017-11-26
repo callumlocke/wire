@@ -53,7 +53,7 @@ const createMatcher = (
 
         const l = pattern.length
         const matchers = []
-        const posNeg = []
+        const results = []
 
         for (let i = 0; i < l; i += 1) {
           const p = pattern[i]
@@ -67,11 +67,11 @@ const createMatcher = (
               throw new Error('wire createMatcher: First glob in an array cannot be negative.')
             }
 
-            posNeg[i] = false
+            results[i] = false
             // matchers[i] = micromatch.matcher(p.substring(1), mmOptions);
             matchers[i] = compileGlobMatcher(p.substring(1), mmOptions)
           } else {
-            posNeg[i] = true
+            results[i] = true
             // matchers[i] = micromatch.matcher(p, mmOptions);
             matchers[i] = compileGlobMatcher(p, mmOptions)
           }
@@ -81,7 +81,7 @@ const createMatcher = (
           let matched = false
 
           for (let i = 0; i < l; i += 1) {
-            if (posNeg[i]) {
+            if (results[i]) {
               if (matchers[i](name)) matched = true
             } else if (matchers[i](name)) matched = false
           }
