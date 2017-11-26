@@ -8,6 +8,7 @@
  * unpredictable results on subsequent calls to your transform.
  */
 
+import mkdirp from 'mkdirp-promise'
 import tempy from 'tempy'
 
 import path from 'path'
@@ -20,10 +21,17 @@ const tmp = (callback: (input: string, output: string) => void) => {
   const inputPath = path.join(tmpDir, 'input')
   const outputPath = path.join(tmpDir, 'output')
 
+  let initialised = false
+
   const inputDir = new Directory(inputPath, { force: true })
   const outputDir = new Directory(outputPath, { force: true })
 
   return singleFile(async (files) => {
+    if (!initialised) {
+      initialised = true
+      await Promise.all([mkdirp(inputPath), mkdirp(outputPath)])
+    }
+
     await inputDir.write(files)
 
     await callback(inputPath, outputPath)
