@@ -19,5 +19,3 @@ export {
   singleFile,
   withSubset,
 }
-
-export type * from './types'
