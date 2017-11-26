@@ -64,7 +64,7 @@
     "create-docs": "documentation build src --format html --output docs",
     "create-flow-files": "npm run build:tmp && flow-copy-source --verbose --ignore '**/__tests__/**' tmp lib",
     "lint": "eslint .",
-    "prepublish": "npm run build && npm run create-flow-files",
+    "prepublishOnly": "npm run build && npm run create-flow-files",
     "test": "jest"
   }
 }
