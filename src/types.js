@@ -69,6 +69,7 @@ export type Matchable =
   | RegExp
   | Array<string>
   | string
+  | boolean
   | void
   | null
   | ((name: string) => any)
