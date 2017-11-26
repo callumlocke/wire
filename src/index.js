@@ -7,6 +7,7 @@ import compose from './compose'
 import createMatcher from './createMatcher'
 import diff from './diff'
 import singleFile from './singleFile'
+import tmp from './tmp'
 import withSubset from './withSubset'
 
 export {
@@ -17,5 +18,6 @@ export {
   diff,
   Directory,
   singleFile,
+  tmp,
   withSubset,
 }
