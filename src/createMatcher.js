@@ -1,7 +1,8 @@
 // @flow
 
 import minimatch from 'minimatch'
-import type { Matchable, Matcher } from '.'
+
+import type { Matchable, Matcher } from './types'
 
 const defaults = {
   dot: false,

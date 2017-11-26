@@ -1,14 +1,17 @@
 // @flow
 
-import fs from 'fs'
-import path from 'path'
-import { promisify } from 'util'
-import del from 'del'
-import tempy from 'tempy'
 import Bluebird from 'bluebird'
 import mkdirp from 'mkdirp-promise'
-import { diff, Directory } from '..'
-import type { Filemap } from '..'
+import tempy from 'tempy'
+
+import { promisify } from 'util'
+import del from 'del'
+import fs from 'fs'
+import path from 'path'
+
+import type { Filemap } from '../types'
+import Directory from '../Directory'
+import diff from '../diff'
 
 const writeFile = promisify(fs.writeFile)
 

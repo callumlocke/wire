@@ -1,8 +1,10 @@
 // @flow
 
-import path from 'path'
 import * as Immutable from 'immutable'
-import type { Filemap } from '.'
+
+import path from 'path'
+
+import type { Filemap } from './types'
 
 const memo: WeakSet<Filemap> = new WeakSet()
 

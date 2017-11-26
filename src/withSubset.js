@@ -1,13 +1,17 @@
 // @flow
 
-import { compose, castFilemap, createMatcher } from '.'
-import type { Matchable, Transform, AsyncTransform } from '.'
+// import type { Matchable, Transform, AsyncTransform } from './t'
 
 /**
  * Creates an asynchronous transform that will apply the given `transforms` to only a subset of
  * incoming files. Files outside this subset are kept aside and then recombined with the output
  * files at the end before finally returning them.
  */
+
+import type { AsyncTransform, Matchable, Transform } from './types'
+import castFilemap from './castFilemap'
+import compose from './compose'
+import createMatcher from './createMatcher'
 
 export default function withSubset(
   pattern: Matchable,

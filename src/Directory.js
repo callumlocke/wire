@@ -1,20 +1,24 @@
 // @flow
 
-import { promisify } from 'util'
-import EventEmitter from 'events'
-import fs from 'fs'
-import path from 'path'
 import { debounce } from 'lodash'
 import { grey, red } from 'chalk'
-import * as Immutable from 'immutable'
 import Bluebird from 'bluebird'
+import * as Immutable from 'immutable'
 import mkdirp from 'mkdirp-promise'
 import parseFilesize from 'filesize-parser'
 import prettyBytes from 'pretty-bytes'
 import sane from 'sane'
 import subdir from 'subdir'
-import { diff, createMatcher, castFilemap } from '.'
-import type { Matcher, Filemap, FilemapLike } from '.'
+
+import { promisify } from 'util'
+import EventEmitter from 'events'
+import fs from 'fs'
+import path from 'path'
+
+import type { Matcher, Filemap, FilemapLike } from './types'
+import castFilemap from './castFilemap'
+import createMatcher from './createMatcher'
+import diff from './diff'
 
 const lstat = promisify(fs.lstat)
 const readdir = promisify(fs.readdir)

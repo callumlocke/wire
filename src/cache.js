@@ -1,11 +1,15 @@
 // @flow
 
-import path from 'path'
-import invariant from 'invariant'
 import Bluebird from 'bluebird'
 import JoinTable from 'join-table'
-import { castFilemap, diff, singleFile } from '.'
-import type { GranularBuildFunction, AsyncTransform, Filemap } from '.'
+import invariant from 'invariant'
+
+import path from 'path'
+
+import type { GranularBuildFunction, AsyncTransform, Filemap } from './types'
+import castFilemap from './castFilemap'
+import diff from './diff'
+import singleFile from './singleFile'
 
 /**
  * Returns an async transform that, when passed a filemap, runs your callback once for every file
