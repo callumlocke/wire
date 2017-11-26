@@ -21,7 +21,6 @@
     "pretty-hrtime": "^1.0.3",
     "resolve-from": "^4.0.0",
     "sane": "^2.2.0",
-    "stack-trace": "0.0.10",
     "subdir": "0.0.3",
     "tempy": "^0.2.1"
   },
