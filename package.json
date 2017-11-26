@@ -57,7 +57,7 @@
   ],
   "license": "MIT",
   "main": "lib",
-  "repo": "callumlocke/wire",
+  "repository": "callumlocke/wire",
   "scripts": {
     "build": "del lib && babel src --out-dir lib --ignore '**/__tests__/**'",
     "build:tmp": "del tmp && PRESERVE_MODULE_SYNTAX=1 PRESERVE_FLOW_ANNOTATIONS=1 babel src --out-dir tmp --ignore '**/__tests__/**'",
