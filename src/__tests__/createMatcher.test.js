@@ -1,6 +1,6 @@
 // @flow
 
-import { createMatcher } from '..'
+import createMatcher from '../createMatcher'
 
 test('createMatcher() works with a glob', () => {
   const match = createMatcher('foo/**/*.css')

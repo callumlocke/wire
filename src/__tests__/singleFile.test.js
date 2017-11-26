@@ -1,7 +1,8 @@
 // @flow
 
 import Bluebird from 'bluebird'
-import { singleFile } from '..'
+
+import singleFile from '../singleFile'
 
 describe('singleFile()', () => {
   test('basic functionality', async () => {

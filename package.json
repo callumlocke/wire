@@ -18,6 +18,7 @@
     "minimatch": "^3.0.4",
     "mkdirp-promise": "^5.0.1",
     "pretty-bytes": "^4.0.2",
+    "pretty-hrtime": "^1.0.3",
     "resolve-from": "^4.0.0",
     "sane": "^2.2.0",
     "stack-trace": "0.0.10",
@@ -48,8 +49,7 @@
     "flow-copy-source": "^1.2.1",
     "flow-typed": "^2.2.3",
     "hard-rejection": "^1.0.0",
-    "jest": "^21.2.1",
-    "pretty-hrtime": "^1.0.3"
+    "jest": "^21.2.1"
   },
   "files": [
     "lib"
@@ -61,9 +61,9 @@
     "build": "del lib && babel src --out-dir lib --ignore '**/__tests__/**'",
     "build:tmp": "del tmp && PRESERVE_MODULE_SYNTAX=1 PRESERVE_FLOW_ANNOTATIONS=1 babel src --out-dir tmp --ignore '**/__tests__/**'",
     "check-types": "flow",
-    "lint": "eslint .",
     "create-docs": "documentation build src --format html --output docs",
     "create-flow-files": "npm run build:tmp && flow-copy-source --verbose --ignore '**/__tests__/**' tmp lib",
+    "lint": "eslint .",
     "prepublish": "npm run build && npm run create-flow-files",
     "test": "jest"
   }

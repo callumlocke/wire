@@ -1,6 +1,6 @@
 // @flow
 
-import { diff } from '..'
+import diff from '../diff'
 
 test('diff() works', () => {
   const input = {

@@ -1,9 +1,10 @@
 // @flow
 
-import invariant from 'invariant'
 import * as Immutable from 'immutable'
-import { castFilemap } from '.'
-import type { FilemapLike, FilemapPatch } from '.'
+import invariant from 'invariant'
+
+import type { FilemapLike, FilemapPatch } from './types'
+import castFilemap from './castFilemap'
 
 type SetOfFilenames = Immutable.Set<string>
 

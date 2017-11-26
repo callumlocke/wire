@@ -8,9 +8,12 @@
  * unpredictable results on subsequent calls to your transform.
  */
 
-import path from 'path'
 import tempy from 'tempy'
-import { Directory, singleFile } from '.'
+
+import path from 'path'
+
+import Directory from './Directory'
+import singleFile from './singleFile'
 
 const tmp = (callback: (input: string, output: string) => void) => {
   const tmpDir = tempy.directory()

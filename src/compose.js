@@ -1,8 +1,9 @@
 // @flow
 
 import { Map as ImmutableMap } from 'immutable'
-import type { PermissiveTransform, LooseTransform } from '.'
-import { castFilemap } from '.'
+
+import type { PermissiveTransform, LooseTransform } from './types'
+import castFilemap from './castFilemap'
 
 /**
  * Compose a list of transforms into a single transform that runs as an asynchronous series of
