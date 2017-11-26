@@ -28,7 +28,7 @@ const unlink = promisify(fs.unlink)
 const writeFile = promisify(fs.writeFile)
 
 const defaults = {
-  match: '**',
+  match: true,
   limit: '10MB',
   log: false,
   emitWatchErrors: false,
