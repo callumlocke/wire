@@ -63,6 +63,13 @@ async function pruneEmptyAncestors(file, until) {
  */
 
 async function reprime(dir) {
+  /* eslint-disable no-param-reassign */
+
+  // on first call, ensure it exists
+  if (!dir._primed) {
+    await mkdirp(dir._absolutePath)
+  }
+
   // start the new files and mtimes caches (eventually to replace the ones on the object)
   const files = {}
   const mtimes = {}
@@ -128,18 +135,18 @@ async function reprime(dir) {
     })
 
   // start recursive load
-  try {
-    await load(dir._absolutePath)
-  } catch (error) {
-    // create the base directory if it doesn't exist
-    if (error.code === 'ENOENT' && error.path === dir._absolutePath) {
-      await mkdirp(dir._absolutePath)
-      await load(dir._absolutePath)
-    } else throw error
-  }
+  await load(dir._absolutePath)
+  // try {
+  //   await load(dir._absolutePath)
+  // } catch (error) {
+  //   // create the base directory if it doesn't exist
+  //   if (error.code === 'ENOENT' && error.path === dir._absolutePath) {
+  //     await mkdirp(dir._absolutePath)
+  //     await load(dir._absolutePath)
+  //   } else throw error
+  // }
 
   // save the new caches and note that the directory has been primed
-  /* eslint-disable no-param-reassign */
   dir._files = Immutable.Map(files)
   dir._mtimes = Immutable.Map(mtimes)
   dir._primed = true
