@@ -39,7 +39,8 @@ const createMatcher = (
 
   switch (pattern) {
     case false:
-      throw new Error('wire createMatcher: pattern cannot be false')
+    case true:
+      return () => pattern
 
     case '':
       throw new Error('wire createMatcher: pattern cannot be an empty string')
