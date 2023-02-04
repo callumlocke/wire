@@ -21,7 +21,7 @@ export const subset = (
     // add unmatched files to output, unless output includes them
     if (keepUnmatched) {
       for (const name of Object.keys(input))
-        if (!matchFile(name) && !output[name]) output[name] = input[name]
+        if (!output[name] && !matchFile(name)) output[name] = input[name]
     }
 
     return output
