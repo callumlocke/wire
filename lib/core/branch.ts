@@ -15,7 +15,7 @@ import { pathUtil } from '../deps.ts'
 import { Filemap, Transform } from '../types.ts'
 
 export const branch =
-  (transforms: Record<string, Transform>, includeUnmatched = true): Transform =>
+  (transforms: Record<string, Transform>, keepUnmatched = true): Transform =>
   async (input: Filemap) => {
     const output: Filemap = {}
     await Promise.resolve()
@@ -45,10 +45,10 @@ export const branch =
       Object.assign(output, await jobs[glob])
     }
 
-    if (includeUnmatched) {
-      // add the files that didn't match any glob
+    if (keepUnmatched) {
+      // add the files that didn't match any glob, but also weren't output by a transform
       for (const name of inputFiles) {
-        output[name] = input[name]
+        if (!output[name]) output[name] = input[name]
       }
     }
 
