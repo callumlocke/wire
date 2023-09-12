@@ -1,5 +1,5 @@
-import { Filemap, Matchable, Transform } from '../types.ts'
-import { createMatcher } from './createMatcher.ts'
+import { Filemap, Matchable, Transform } from '../types'
+import { createMatcher } from './createMatcher'
 
 export const subset = (
   match: Matchable,

@@ -1,15 +1,16 @@
-import { produce } from 'npm:immer@9.0.16'
-import { pathUtil, resolveProps } from '../deps.ts'
+import pathUtil from 'path'
+import { produce } from 'immer'
 import type {
   LazyBuilder,
   Transform,
   Filemap,
   Includer,
   LazyBuildresult,
-} from '../types.ts'
-import { castFilemap } from './castFilemap.ts'
-import { diff } from './diff.ts'
-import { PairSet } from './PairSet.ts'
+} from '../types'
+import { castFilemap } from './castFilemap'
+import { diff } from './diff'
+import { PairSet } from './PairSet'
+import { resolveProps } from './resolveProps'
 
 /**
  * Returns an async transform that, when passed a filemap, runs your callback once for every file. Your callback decides what to output for the given input file – it may output the file as-is, or a buffer/string of new contents to replace the file, or `null` to exclude that file from the output, or a plain object detailing multiple files to output instead of the original file.
@@ -94,7 +95,7 @@ export const lazy = (fn: LazyBuilder): Transform => {
       const allOutputPaths: Record<string, string> = {} // {[outputPath]: buildPath}
 
       // process the results to determine output, using all the filesToBuild keys as build paths, putting data into outputWrites (a list of everything we need to write to disk at the end)
-      const outputWrites: { [name: string]: Uint8Array } = {}
+      const outputWrites: { [name: string]: Buffer } = {}
       const buildPaths = Object.keys(filesToBuild)
 
       for (const buildPath of buildPaths) {
@@ -103,7 +104,7 @@ export const lazy = (fn: LazyBuilder): Transform => {
         let result: LazyBuildresult = r
 
         // normalise the result format to Record<string, Buffer | string> if not already
-        if (result instanceof Uint8Array || typeof result === 'string') {
+        if (result instanceof Buffer || typeof result === 'string') {
           const newContents = result
           result = { [buildPath]: newContents }
         } else if (typeof result !== 'object') {

@@ -1,6 +1,5 @@
-import type { Filemappish, FilemapPatch } from '../types.ts'
-import { castFilemap } from './castFilemap.ts'
-import { equal } from '../deps.ts'
+import type { Filemappish, FilemapPatch } from '../types'
+import { castFilemap } from './castFilemap'
 
 /**
  * Get an object detailing the differences between two filemaps, `input` and `output`.
@@ -22,7 +21,7 @@ export const diff = (
   for (const [outputKey, outputValue] of Object.entries(outputFilemap)) {
     const inputValue = inputFilemap[outputKey]
 
-    if (!inputValue || !equal(inputValue, outputValue))
+    if (!inputValue || !outputValue.equals(inputValue))
       changes[outputKey] = outputValue
   }
 

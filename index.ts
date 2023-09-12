@@ -1,0 +1,12 @@
+export { pipe } from './core/pipe'
+export { lazy } from './core/lazy'
+export { Directory } from './core/Directory'
+export { diff } from './core/diff'
+export { withPatch } from './core/withPatch'
+export { castFilemap } from './core/castFilemap'
+export { createMatcher } from './core/createMatcher'
+export { tmp } from './core/tmp'
+export { subset } from './core/subset'
+export { branch } from './core/branch'
+
+export * from './types'

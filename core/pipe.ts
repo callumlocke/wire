@@ -1,5 +1,5 @@
-import type { Filemap, Transform } from '../types.ts'
-import { castFilemap } from './castFilemap.ts'
+import type { Filemap, Transform } from '../types'
+import { castFilemap } from './castFilemap'
 
 /**
  * Pipe a list of transforms into a single transform that runs as an asynchronous series of steps.

@@ -1,10 +1,20 @@
 // deno-lint-ignore-file no-explicit-any
-import { fs, pathUtil, colors, debounce } from '../deps.ts'
-import { Filemap, Filemappish, Matchable, Matcher } from '../types.ts'
-import { createMatcher } from './createMatcher.ts'
-import { parseFilesize } from './parseFilesize.ts'
-import { diff } from './diff.ts'
-import { castFilemap } from './castFilemap.ts'
+import { Stats } from 'node:fs'
+import fs from 'node:fs/promises'
+
+import pathUtil from 'node:path'
+import chalk from 'chalk'
+import { debounce } from 'lodash'
+import sane from 'sane'
+import type { Watcher as SaneWatcher } from 'sane'
+
+import { Filemap, Filemappish, Matchable, Matcher } from '../types'
+import { createMatcher } from './createMatcher'
+import { parseFilesize } from './parseFilesize'
+import { diff } from './diff'
+import { castFilemap } from './castFilemap'
+import { asyncFolderWalker } from 'async-folder-walker'
+import { ensureDir } from './ensureDir'
 
 const dirContainsPath = (parent: string, possibleDescendentPath: string) => {
   const relative = pathUtil.relative(parent, possibleDescendentPath)
@@ -44,15 +54,14 @@ async function pruneEmptyAncestors(file: string, until: string) {
 
   // Attempt to remove the directory (if it has contents, this will correctly fail and recursion will end)
   try {
-    await Deno.remove(parent)
+    await fs.unlink(parent)
   } catch (error: unknown) {
     // if it's just a non-empty or missing directory, swallow error and end recursion
     if (
       error instanceof Error &&
-      typeof error.message === 'string' &&
-      // TODO better way to detect this error
-      (error.message.startsWith('Directory not empty') ||
-        error instanceof Deno.errors.NotFound)
+      'code' in error &&
+      (error.code === 'EPERM' || // code for when it's not empty (TODO see if there's a more specific way to catch this)
+        error.code === 'ENOENT') // code for when it's missing
     ) {
       return
     }
@@ -75,9 +84,10 @@ export class Directory {
   private logWatchErrors: boolean
   private emitWatchErrors: boolean
   private logPrelude: string
-  private watcher: null | Deno.FsWatcher
+  private watcher: null | SaneWatcher
   private primed: boolean
-  private files: Record<string, Uint8Array>
+  // private files: Record<string, Buffer>
+  private files: Filemap
   private mtimes: Record<string, number>
   private queuedOperations: Promise<any>
   private subscriber: null | Promise<Filemap>
@@ -102,13 +112,13 @@ export class Directory {
     this.logWatchErrors = Boolean(options.logWatchErrors)
     this.emitWatchErrors = Boolean(options.emitWatchErrors)
     this.logPrelude =
-      pathUtil.relative(Deno.cwd(), this.absolutePath) + pathUtil.sep
+      pathUtil.relative(process.cwd(), this.absolutePath) + pathUtil.sep
 
     this.queuedOperations = Promise.resolve()
 
     if (
       options.force !== true &&
-      !dirContainsPath(Deno.cwd(), this.absolutePath)
+      !dirContainsPath(process.cwd(), this.absolutePath)
     ) {
       throw new Error(
         'wire Directory: Cannot work outside CWD unless you set force:true'
@@ -136,10 +146,10 @@ export class Directory {
    */
   private async reprime() {
     // on first call, ensure the directory exists
-    if (!this.primed) await fs.ensureDir(this.absolutePath)
+    if (!this.primed) await ensureDir(this.absolutePath)
 
     // start the new files and mtimes caches (eventually to replace this.files and this.mtimes)
-    const files: Record<string, Uint8Array> = {}
+    const files: Record<string, Buffer> = {}
     const mtimes: Record<string, number> = {}
 
     // let totalSize = 0 // TODO
@@ -149,11 +159,26 @@ export class Directory {
     const paths = []
     const contentsPromises = []
 
-    for await (const entry of fs.walk(this.absolutePath, {
-      includeDirs: false,
-    })) {
-      paths[index] = pathUtil.relative(this.absolutePath, entry.path)
-      contentsPromises[index] = Deno.readFile(entry.path) // TODO only if mtime changed (like in Node version)
+    const walker = asyncFolderWalker([this.absolutePath], {})
+
+    for await (const { stat, relname, filepath } of walker) {
+      // annoying type checks because asyncFolderWalker's bundled types are wrong
+      if (!(stat instanceof Stats))
+        throw new TypeError('Expected walker to return a Stats instance')
+      if (!(typeof relname === 'string'))
+        throw new TypeError('Expected walker to return a string for relname')
+      if (!(typeof filepath === 'string'))
+        throw new TypeError('Expected walker to return a string for filepath')
+
+      // skip directories
+      if (stat.isDirectory()) continue
+
+      // capture the file path
+      paths[index] = relname
+
+      // capture a promise for the file contents at the same index
+      contentsPromises[index] = fs.readFile(filepath) // TODO only if mtime changed (like in Node version)
+
       index++
     }
 
@@ -224,7 +249,7 @@ export class Directory {
       const patchKeys = Object.keys(patch)
 
       // start some mutatable objects based on our existing caches (eventually to replace them)
-      const newFiles: { [name: string]: Uint8Array } = { ...this.files }
+      const newFiles: { [name: string]: Buffer } = { ...this.files }
       const newMtimes = { ...this.mtimes }
 
       // note deleted paths (so we can prune empty dirs after deleting the files)
@@ -234,7 +259,7 @@ export class Directory {
 
       await Promise.all(
         patchKeys.map(async (name) => {
-          const content = patch[name] as Uint8Array | null // cannot be undefined
+          const content = patch[name] as Buffer | null // cannot be undefined
 
           if (content === null) {
             // the patch says we should delete this file.
@@ -242,19 +267,16 @@ export class Directory {
             delete newFiles[name]
 
             // delete the file from disk
-            await Deno.remove(pathUtil.join(this.absolutePath, name))
+            await fs.rm(pathUtil.join(this.absolutePath, name))
 
             this.log(` → delete ${this.logPrelude}${name}`)
           } else {
             // the patch says this file has changed.
             // write the file to disk
-            await fs.ensureDir(
+            await ensureDir(
               pathUtil.dirname(pathUtil.join(this.absolutePath, name))
-            ) // TODO is this nec in Deno?
-            await Deno.writeFile(
-              pathUtil.join(this.absolutePath, name),
-              content
             )
+            await fs.writeFile(pathUtil.join(this.absolutePath, name), content)
 
             this.log(` →  write ${this.logPrelude}${name}`)
 
@@ -303,7 +325,7 @@ export class Directory {
             .catch((error) => {
               if (this.logWatchErrors) {
                 console.error(
-                  colors.red('wire Directory: error from watch subscriber')
+                  chalk.red('wire Directory: error from watch subscriber')
                 )
                 console.error(error)
               }
@@ -316,59 +338,40 @@ export class Directory {
         }, 10)
 
         // create the watcher
-        this.watcher = Deno.watchFs(this.absolutePath, { recursive: true })
+        this.watcher = sane(this.absolutePath)
 
-        // read the initial contents from disk, and wait for it
+        // read the initial contents from disk (reprime) then wait for changes
         return this.reprime().then(async () => {
-          // call callback once on startup with initial contents, and resolve this queue item once the callback is done
+          // call the callback once on startup with initial contents, and resolve this queue item once the callback is done
           Promise.resolve(notify()).then(() => resolve())
 
-          // wait for fs events in the background
-          try {
-            for await (const { paths } of this.watcher!) {
-              // figure out change types (`event.kind` is not very reliable IRL)
-              const changeTypes = await Promise.all(
-                paths.map(async (path) => {
-                  try {
-                    const stat = await Deno.stat(path)
-                    return stat.isFile ? 'written' : 'removed'
-                  } catch (_error) {
-                    return 'removed'
-                  }
-                })
-              )
+          if (this.watcher === null) throw new Error('wire: no watcher')
 
-              // TODO figure out if safe to do all fs ops in parallel promises and notify once after all of them
-              let i = 0
-              for (const absolutePath of paths) {
-                const path = pathUtil.relative(this.absolutePath, absolutePath)
-                if (!this.match(path)) continue
+          const handleWritten = async (path: string) => {
+            if (!this.match(path)) return
 
-                const kind = changeTypes[i++]
+            this.log('write', this.logPrelude + path)
 
-                switch (kind) {
-                  case 'removed':
-                    this.log('remove', this.logPrelude + path)
-                    delete this.files[path]
-                    delete this.mtimes[path]
-                    notify()
-                    break
-                  case 'written':
-                    this.log(kind, this.logPrelude + path)
-                    this.mtimes[path] = Date.now()
-                    this.files[path] = await Deno.readFile(
-                      pathUtil.join(this.absolutePath, path)
-                    )
-                    notify()
-                    break
-                  default:
-                    throw new Error('unhandled kind: ' + kind)
-                }
-              }
-            }
-          } catch (error) {
-            reject(error)
+            this.mtimes[path] = Date.now()
+            this.files[path] = await fs.readFile(
+              pathUtil.join(this.absolutePath, path)
+            )
+            notify()
           }
+
+          const handleRemoved = async (path: string) => {
+            if (!this.match(path)) return
+
+            this.log('remove', this.logPrelude + path)
+
+            delete this.files[path]
+            delete this.mtimes[path]
+            notify()
+          }
+
+          this.watcher.on('change', handleWritten)
+          this.watcher.on('add', handleWritten)
+          this.watcher.on('delete', handleRemoved)
         })
       })
     })

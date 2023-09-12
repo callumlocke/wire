@@ -1,7 +1,8 @@
-import { diff } from '../diff.ts'
-import { assert } from '../../deps.ts'
+import { test } from 'bun:test'
+import { diff } from '../diff'
+import assert from 'assert'
 
-Deno.test('diff', () => {
+test('diff', () => {
   const decoder = new TextDecoder()
 
   const inputFiles = {

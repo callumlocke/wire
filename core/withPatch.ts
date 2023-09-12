@@ -1,6 +1,6 @@
-import { diff } from './diff.ts'
-import { singleFile } from './singleFile.ts'
-import { Filemap, FilemapPatch, Transform } from '../types.ts'
+import { diff } from './diff'
+import { singleFile } from './singleFile'
+import { Filemap, FilemapPatch, Transform } from '../types'
 
 /**
  * Creates a transform that calls the transform you provide along with a second argument: a `patch` describing the changes to the input filemap since the last time the transform was called.

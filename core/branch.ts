@@ -11,8 +11,8 @@
  * This is like subset, except that it only takes globs, not any Matchable.
  */
 
-import { pathUtil } from '../deps.ts'
-import { Filemap, Transform } from '../types.ts'
+import globToRegExp from 'glob-to-regexp'
+import { Filemap, Transform } from '../types'
 
 export const branch =
   (transforms: Record<string, Transform>, keepUnmatched = true): Transform =>
@@ -25,7 +25,7 @@ export const branch =
 
     for (const glob of Object.keys(transforms)) {
       const matchedFiles = inputFiles.filter((name) =>
-        pathUtil.globToRegExp(glob).test(name)
+        globToRegExp(glob).test(name)
       )
 
       // exclude matched files from the next glob

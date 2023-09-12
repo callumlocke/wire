@@ -1,12 +1,11 @@
-import { pathUtil } from '../deps.ts'
-
-import type { Matchable, Matcher } from '../types.ts'
+import micromatch from 'micromatch'
+import type { Matchable, Matcher } from '../types'
 
 const compileGlobMatcher = (
   glob: string,
-  options?: pathUtil.GlobOptions // TODO
+  options?: micromatch.Options // TODO
 ): Matcher => {
-  const re = pathUtil.globToRegExp(glob, options)
+  const re = micromatch.makeRe(glob, options)
   return (name) => re.test(name)
 }
 
@@ -16,7 +15,7 @@ const alwaysFalse = () => false
 const memo: WeakSet<Matcher> = new WeakSet()
 
 type CreateMatcherOptions = {
-  globOptions?: pathUtil.GlobOptions
+  globOptions?: micromatch.Options
 }
 
 /**
@@ -30,6 +29,8 @@ type CreateMatcherOptions = {
  * - a regular expression
  * - any function (it will be called with the test string and its return value will be taken as boolean)
  * - a boolean (`true` matches everything, `false` matches nothing)
+ *
+ * If an array is passed, the globs are processed in order from left to right. A negative glob can unmatch something that has thus far been matched. So if you want to match everything except `*.js` files, you would do `['**', '!*.js']`. This implies that the first glob can never be negative, as it would have no effect - if you try to do that, an error will be thrown.
  */
 export const createMatcher = (
   criteria: Matchable = '**',

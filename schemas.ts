@@ -1,11 +1,14 @@
-import { z } from './deps.ts'
+import { z } from 'zod'
+
+/** Validates a node Buffer */
+const bufferSchema = z.custom<Buffer>((val) => Buffer.isBuffer(val))
 
 /** Validates a filemap */
-export const filemapSchema = z.record(z.instanceof(Uint8Array))
+export const filemapSchema = z.record(bufferSchema)
 
 /** Validates a filemappish object */
 export const filemappishSchema = z.record(
-  z.union([z.instanceof(Uint8Array), z.string()]).nullish()
+  z.union([bufferSchema, z.string()]).nullish()
 )
 
 /** Validates a transform function */

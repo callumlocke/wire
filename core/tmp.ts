@@ -1,7 +1,9 @@
-import { Directory } from './Directory.ts'
-import { singleFile } from './singleFile.ts'
-import { Filemap } from '../types.ts'
-import { fs, pathUtil } from '../deps.ts'
+import pathUtil from 'path'
+import { Directory } from './Directory'
+import { singleFile } from './singleFile'
+import { Filemap } from '../types'
+import { ensureDir } from './ensureDir'
+import { emptyDir } from './emptyDir'
 
 /**
  * Creates a transform that allows your callback to modify files on disk. Intended for wiring up CLI tools that expect to work on real files on a filesystem and don't provide an interface to work with `lazy` `include` callbacks.
@@ -26,7 +28,7 @@ export const tmp = (
   ) => Promise<void> | void,
   root?: string
 ) => {
-  const tmpRoot = root ? root : pathUtil.resolve(Deno.cwd(), '.wire', 'tmp')
+  const tmpRoot = root ? root : pathUtil.resolve(process.cwd(), '.wire', 'tmp')
   const inputPath = pathUtil.resolve(tmpRoot, 'input')
   const outputPath = pathUtil.resolve(tmpRoot, 'output')
 
@@ -39,7 +41,7 @@ export const tmp = (
     if (!started) {
       started = true
       // emptying input dir is not necessary as this will be done by the first call to `inputDir.write()`, which is more efficient in the common case where some files are unchanged
-      await Promise.all([fs.ensureDir(inputPath), fs.emptyDir(outputPath)])
+      await Promise.all([ensureDir(inputPath), emptyDir(outputPath)])
     }
 
     await inputDir.write(files)

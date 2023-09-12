@@ -1,6 +1,6 @@
-// Based on https://github.com/patrickkettner/filesize-parser/blob/7938b23701b4e87bdb7587a355eba0fd238b947f/index.js
+import assert from 'node:assert'
 
-import { assert } from '../deps.ts'
+// Based on https://github.com/patrickkettner/filesize-parser/blob/7938b23701b4e87bdb7587a355eba0fd238b947f/index.js
 
 const validAmount = (n: string): boolean =>
   !Number.isNaN(parseFloat(n)) && Number.isFinite(Number(n))

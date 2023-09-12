@@ -1,5 +1,5 @@
-import { createMatcher } from './createMatcher.ts'
-import { Filemap, Matchable } from '../types.ts'
+import { createMatcher } from './createMatcher'
+import { Filemap, Matchable } from '../types'
 
 /**
  * Filters a filemap by filename.
