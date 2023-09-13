@@ -159,7 +159,9 @@ export class Directory {
     const paths = []
     const contentsPromises = []
 
-    const walker = asyncFolderWalker([this.absolutePath], {})
+    const walker = asyncFolderWalker([this.absolutePath], {
+      shaper: (fwData) => fwData,
+    })
 
     for await (const { stat, relname, filepath } of walker) {
       // annoying type checks because asyncFolderWalker's bundled types are wrong

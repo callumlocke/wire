@@ -136,11 +136,11 @@ export const lazy = (fn: LazyBuilder): Transform => {
 
           // make sure it's a buffer
           if (typeof content === 'string') {
-            content = new TextEncoder().encode(content)
-          } else if (!(content instanceof Uint8Array)) {
+            content = Buffer.from(content)
+          } else if (!(content instanceof Buffer)) {
             throw new TypeError(
               `wire lazy: Expected value for output file "${outputPath}" ` +
-                `to be string or Uint8Array; got ${typeof content}.`
+                `to be string or Buffer; got ${typeof content}.`
             )
           }
 
