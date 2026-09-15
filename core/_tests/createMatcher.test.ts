@@ -1,7 +1,7 @@
 import { expect, test } from 'bun:test'
 import { createMatcher } from '../createMatcher'
 
-test('glob', () => {
+test('default options', () => {
   const match = createMatcher('foo/**/*.css')
 
   expect(match('foo/a.css')).toBe(true)
@@ -10,8 +10,25 @@ test('glob', () => {
   expect(match('a/b/c/d.css')).toBe(false)
   expect(match('a/b/c/d.html')).toBe(false)
 
-  // dotfiles can be matched (cf. minimatch default behaviour)
-  // expect(match('foo/a/b/c/.d.css')).toBe(true) // DISABLED - micromatch defaults to dot:false, but minimatch defaulted to dot:true - need to decide whether to go with micromatch's defaults or whether to set our own dot:true (still overrridable by user)
+  expect(match('foo/a/b/c/.d.css')).toBe(false)
+})
+
+test('dot:true option enables matching dotfiles', () => {
+  const match = createMatcher('foo/**/*.css', { dot: true })
+
+  expect(match('foo/a.css')).toBe(true)
+  expect(match('foo/a/b/c/d.css')).toBe(true)
+  expect(match('a.css')).toBe(false)
+  expect(match('a/b/c/d.css')).toBe(false)
+  expect(match('a/b/c/d.html')).toBe(false)
+
+  expect(match('foo/a/b/c/.d.css')).toBe(true)
+})
+
+test('defaults can match dotfiles if pattern has an explicit dot', () => {
+  const match = createMatcher(['foo/**/.*'])
+  expect(match('foo/a.css')).toBe(false)
+  expect(match('foo/.gitignore')).toBe(true)
 })
 
 test('array of globs', () => {
