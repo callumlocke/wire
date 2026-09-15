@@ -7,10 +7,14 @@ import type {
 import { castSnapshot } from './castSnapshot'
 import { createMatcher } from './createMatcher'
 
+/**
+ * Creates a transform that runs a given transform on only the subset of files allowed by `match`.
+ */
+
 export const subset = (
   match: Matchable,
   transform: Transformish,
-  keepUnmatched = true
+  keepUnmatched = true,
 ): StrictTransform => {
   const matchFile = createMatcher(match)
 
