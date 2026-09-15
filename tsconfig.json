@@ -21,5 +21,6 @@
 
     "jsx": "preserve",
     "lib": ["esnext"],
+    "types": ["bun"]
   }
 }
