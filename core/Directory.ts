@@ -81,6 +81,7 @@ export class Directory {
   private mtimes: Record<string, number>
   private queuedOperations: Promise<any>
   private subscriber: null | Promise<Snapshot>
+  private options: DirectoryOptions
 
   get path() {
     return this.absolutePath
@@ -88,6 +89,7 @@ export class Directory {
 
   constructor(name: string, partialOptions?: Partial<DirectoryOptions>) {
     const options: DirectoryOptions = { ...defaults, ...partialOptions }
+    this.options = options
 
     this.absolutePath = pathUtil.resolve(name)
     this.match = createMatcher(options.match)
@@ -132,7 +134,7 @@ export class Directory {
   }
 
   /**
-   * Update the in-memory snapshot to match the real files on disk, if changed.
+   * Update the in-memory snapshot to reflect the real files on disk, if changed.
    */
   private async reprime() {
     // on first call, ensure the directory exists
@@ -155,18 +157,15 @@ export class Directory {
     })
 
     for await (const { stat, relname, filepath } of walker) {
-      // annoying type checks because asyncFolderWalker's bundled types are wrong
-      if (!(stat instanceof Stats))
-        throw new TypeError('Expected walker to return a Stats instance')
-      if (!(typeof relname === 'string'))
-        throw new TypeError('Expected walker to return a string for relname')
-      if (!(typeof filepath === 'string'))
-        throw new TypeError('Expected walker to return a string for filepath')
-
-      // skip directories
-      if (stat.isDirectory()) continue
+      if (stat.isDirectory() || !this.match(relname)) continue
 
       totalSize += stat.size
+
+      if (totalSize > this.limit) {
+        throw new Error(
+          `wire Directory: File size limit exceeded options.limit (${this.options.limit})`,
+        )
+      }
 
       // capture the file path
       paths[index] = relname
