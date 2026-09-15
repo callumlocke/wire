@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test'
-import { singleFile } from '../singleFile'
+import { singleFile } from '../lib/singleFile'
 
 describe('singleFile()', () => {
   test('basic functionality', async () => {

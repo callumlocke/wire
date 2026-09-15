@@ -3,8 +3,8 @@ import { produce } from 'immer'
 import type { StrictTransform, Snapshot } from '../types'
 import { castSnapshot } from './castSnapshot'
 import { diff } from './diff'
-import { PairSet } from './PairSet'
-import { resolveProps } from './resolveProps'
+import { PairSet } from './lib/PairSet'
+import { resolveProps } from './lib/resolveProps'
 
 /**
  * Callback function for `lazy` transforms. Determines what should be output in place of a single input file.
@@ -29,13 +29,13 @@ type LazyBuildResult = Buffer | string | Record<string, Buffer | string> | null
 type Includer = (filename: string) => Buffer | null
 
 /**
- * Returns an async transform that, when passed a filemap, runs your callback once for every file that may have changed, and all of their dependents (files your callback requests through the `Includer` function passed into it).
+ * Returns an async transform that, when passed a snapshot, runs your callback once for every file that may have changed, and all of their dependents (files your callback requests through the `Includer` function passed into it).
  *
  * Your callback decides what to output for the given input file – it may output the file as-is, or a buffer/string of new contents to replace the file, or `null` to exclude that file from the output, or a plain object detailing multiple files to output instead of the original file.
  *
  * How it
  *
- * On subsequent calls with new filemaps, runs only on files that were just edited, or any files that were included last time if they still exist
+ * On subsequent calls with new snapshots, runs only on files that were just edited, or any files that were included last time if they still exist
  *
  * If a file is deleted between calls.
  *

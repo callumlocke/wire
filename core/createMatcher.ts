@@ -59,7 +59,7 @@ export const createMatcher = (
 
           if (typeof p !== 'string') {
             throw new TypeError(
-              'createMatcher: Arrays can only contain strings.',
+              'createMatcher: Array may only contain strings.',
             )
           }
 

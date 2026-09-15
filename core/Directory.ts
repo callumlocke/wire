@@ -4,12 +4,12 @@ import pathUtil from 'node:path'
 import { debounce } from 'lodash'
 import sane, { type Watcher as SaneWatcher } from 'sane'
 import { createMatcher } from './createMatcher'
-import { parseFilesize } from './parseFilesize'
+import { parseFilesize } from './lib/parseFilesize'
 import { diff } from './diff'
 import { castSnapshot } from './castSnapshot'
 import { asyncFolderWalker } from 'async-folder-walker'
-import { ensureDir } from './ensureDir'
-import { dirContains } from './dirContains'
+import { ensureDir } from './lib/ensureDir'
+import { dirContains } from './lib/dirContains'
 import type { Snapshot, Snapshottish, Matchable, Matcher } from '../types'
 
 export type DirectoryOptions = {
@@ -64,7 +64,7 @@ async function deleteEmptyParents(file: string, until: string) {
 }
 
 /**
- * Syncs with a directory on disk with in-memory filemaps.
+ * Syncs with a directory on disk with in-memory snapshots.
  */
 export class Directory {
   private absolutePath: string
@@ -132,7 +132,7 @@ export class Directory {
   }
 
   /**
-   * Update the in-memory filemap to match the real files on disk, if changed.
+   * Update the in-memory snapshot to match the real files on disk, if changed.
    */
   private async reprime() {
     // on first call, ensure the directory exists
@@ -179,7 +179,7 @@ export class Directory {
 
     const contents = await Promise.all(contentsPromises)
 
-    // const files: Filemap = {}
+    // const files: Snapshot = {}
     for (let i = 0; i < paths.length; i++)
       files[paths[i]!] = contents[i] as unknown as Buffer
 
@@ -205,7 +205,7 @@ export class Directory {
   }
 
   /**
-   * Gets the contents of the directory as a filemap - from the in-memory cache
+   * Gets the contents of the directory as a snapshot - from the in-memory cache
    * if possible, otherwise from disk.
    */
   public read(incomingFiles?: Snapshot): Promise<Snapshot> {
@@ -298,12 +298,12 @@ export class Directory {
   }
 
   /**
-   * Starts watching the directory on disk, and calls your subscriber with a new filemap whenever something has changed.
+   * Starts watching the directory on disk, and calls your subscriber with a new snapshot whenever something has changed.
    *
    * Returns a promise that resolves after the first call to your subscriber (and after resolution of any promise returned by your subscriber, if applicable).
    */
   public watch(
-    onFilemapChange: (filemap: Snapshot) => any,
+    onSnapshotChange: (snapshot: Snapshot) => any,
     // options?:
   ): Promise<void> {
     return this.whenIdle((): Promise<void> => {
@@ -314,7 +314,7 @@ export class Directory {
           const currentSubscriber = this.subscriber || Promise.resolve()
 
           this.subscriber = currentSubscriber
-            .then(() => onFilemapChange(this.files))
+            .then(() => onSnapshotChange(this.files))
             .catch((error) => {
               if (this.logWatchErrors) {
                 console.error('wire Directory: error from watch subscriber')

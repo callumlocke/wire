@@ -1,8 +1,8 @@
 import path from 'path'
 import { Directory } from './Directory'
-import { singleFile } from './singleFile'
-import { ensureDir } from './ensureDir'
-import { emptyDir } from './emptyDir'
+import { singleFile } from './lib/singleFile'
+import { ensureDir } from './lib/ensureDir'
+import { emptyDir } from './lib/emptyDir'
 import type { Snapshot } from '../types'
 
 /**
@@ -14,7 +14,7 @@ import type { Snapshot } from '../types'
  *
  * The `output` directory is empty the first time your transform is called, but it is **not** cleared out for subsequent calls, so you can optimise incremental builds by avoiding re-creating files that you don't want. But this means you need to be careful about removing files that are no longer needed - many build tools are crap at this.
  *
- * Your async callback should read files from the `input` directory and write files in the `output` directory, before returning/resolving. Subsequent calls in a `dir.watch()` session automatically update the `input` directory to reflect the incoming filemap each time before calling your callback, but they do NOT update the output dir, so you should consider if you need to empty the output dir as a first step during your callback.
+ * Your async callback should read files from the `input` directory and write files in the `output` directory, before returning/resolving. Subsequent calls in a `dir.watch()` session automatically update the `input` directory to reflect the incoming snapshot each time before calling your callback, but they do NOT update the output dir, so you should consider if you need to empty the output dir as a first step during your callback.
  *
  * Important: your callback should not modify anything in the input directory, or you will have
  * unpredictable results on subsequent calls to your transform, and maybe an infinite writing loop.

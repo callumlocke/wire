@@ -28,17 +28,17 @@ export const castSnapshot = (files: Snapshottish = blank): Snapshot => {
     else if (originalValue == null) continue
     else {
       throw new TypeError(
-        'castFilemap: Expected every value to be a string, Buffer, null or undefined',
+        'castSnapshot: Expected every value to be a string, Buffer, null or undefined',
       )
     }
 
     let normalPath = pathUtil.normalize(key)
     if (normalPath[0] === '/')
       throw new Error(
-        `Bad filemap key (absolute pathname): ${JSON.stringify(key)}`,
+        `Bad snapshot key (absolute pathname): ${JSON.stringify(key)}`,
       )
     else if (normalPath.startsWith(`../`))
-      throw new Error(`Bad filemap key (outside root): ${JSON.stringify(key)}`)
+      throw new Error(`Bad snapshot key (outside root): ${JSON.stringify(key)}`)
 
     result[normalPath] = newValue
   }

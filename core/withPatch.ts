@@ -1,14 +1,14 @@
 import { diff } from './diff'
-import { singleFile } from './singleFile'
-import type { Snapshot, FilemapPatch, StrictTransform } from '../types'
+import { singleFile } from './lib/singleFile'
+import type { Snapshot, Patch, StrictTransform } from '../types'
 
 /**
- * Creates a transform that calls the transform you provide along with a second argument: a `FilemapPatch` describing the changes to the input filemap since the last time the transform was called. Single concurrency is enforced.
+ * Creates a transform that calls the transform you provide along with a second argument: a `Patch` describing the changes to the input since the last time the transform was called. Single concurrency is enforced.
  */
 export const withPatch = (
   transformWithPatch: (
     input: Snapshot,
-    patch: FilemapPatch,
+    patch: Patch,
   ) => Promise<Snapshot> | Snapshot,
 ): StrictTransform => {
   let previousFiles: Snapshot = {}

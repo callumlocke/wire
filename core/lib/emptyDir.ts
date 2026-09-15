@@ -2,7 +2,7 @@ import { promises as fs } from 'fs'
 import pathUtil from 'path'
 
 /**
- * Clears a directory out so it's empty, or creates it if it doesn't exist. Errors if a non-directory file already exists at the path
+ * Clears a disk directory out so it's empty, or creates it if it doesn't exist. Errors if a non-directory file already exists at the path
  */
 
 export async function emptyDir(dir: string) {

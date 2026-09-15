@@ -1,51 +1,56 @@
-import type * as z from 'zod/mini'
-import type {
-  filemapSchema,
-  filemappishSchema,
-  matchableSchema,
-} from './schemas'
-
 /**
  * A plain object representing a directory of files on disk. Should always be treated as read-only.
  *
  * Every key is a root-relative file path like `index.html` or `style/main.css`. Every value is a `Buffer` containing the complete file contents.
  */
-export type Snapshot = z.infer<typeof filemapSchema>
+export type Snapshot = Record<string, Buffer>
 
 /** Like a `Snapshot` but less strict - allows string and null values. */
-export type Snapshottish = /*Filemap |*/ z.infer<typeof filemappishSchema>
+export type Snapshottish = Record<string, Buffer | string | null | undefined>
 
-/** Any function that takes a filemap and returns a filemap, either synchronously or asynchronously. */
+/** Any function that receives a snapshot and returns a snapshot, either synchronously or asynchronously. */
 export type StrictTransform = (
-  filemap: Snapshot,
+  snapshot: Snapshot,
 ) => Promise<Snapshot> | Snapshot
+
+export type StrictSyncTransform = (snapshot: Snapshot) => Snapshot
+export type StrictAsyncTransform = (snapshot: Snapshot) => Promise<Snapshot>
+
+;({}) as StrictSyncTransform satisfies StrictTransform
+;({}) as StrictAsyncTransform satisfies StrictTransform
 
 /** Loose input, strict output. */
 export type PermissiveTransform = (
-  filemappish: Snapshottish,
+  snapshotpish: Snapshottish,
 ) => Promise<Snapshot> | Snapshot
 
-/** Strict input, loose output. */
+/** A loose transform function that receives a strict snapshot but may return any snapshottish object (optionally as a promise). */
 export type Transformish = (
-  filemap: Snapshot,
+  snapshot: Snapshot,
 ) => Promise<Snapshottish> | Snapshottish
 
 // /** Loose input and output. */
 // export type Transformish =
 //   | Transform
-//   | ((filemappish: Filemappish) => Promise<Filemappish> | Filemappish)
+//   | ((snapshotpish: Snapshotpish) => Promise<Snapshotpish> | Snapshotpish)
 
 /**
- * Details the differences between two filemaps. Eg, if you read a filemap from disk at different times, you can use `diff` to get a patch telling you what's changed in the interim.
+ * Object detailing the differences between two snapshots. Example use case: if you read a snapshot from disk at different times, you can use `diff` to get a patch telling you what's changed in the interim.
  *
  * New or modified files are represented with a Buffer value. Deleted files are represented with a `null` value. Unchanged files are not included in a patch.
  *
- * Note that `Filemap` satisfies `FilemapPatch`, but the reverse is not true.
+ * Note that `Snapshot` satisfies `Patch`, but the reverse is not true.
  */
-export type FilemapPatch = Record<string, Buffer | null>
+export type Patch = Record<string, Buffer | null>
+
+;({}) as Snapshot satisfies Patch
+// @ts-expect-error
+;({}) as Snapshottish satisfies Patch
 
 /** A glob string, regex, or any other value that can be passed to `createMatcher` to create a matcher function. */
-export type Matchable = z.infer<typeof matchableSchema>
+
+export type Matchable =
+  string | RegExp | boolean | null | ((name: string) => any) | string[]
 
 /** Any function that returns `true` or `false` for a given filename. */
 export type Matcher = (name: string) => boolean
