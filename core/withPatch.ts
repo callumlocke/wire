@@ -17,7 +17,7 @@ export const withPatch = (
     const patch = diff(previousFiles, input)
     previousFiles = input
 
-    return transformWithPatch(input, patch) // satisfies Transform
+    return transformWithPatch(input, patch)
   }
 
   return singleFile(transform)
