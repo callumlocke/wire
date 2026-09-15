@@ -7,7 +7,6 @@
     "@types/pretty-hrtime": "^1.0.3",
     "async-folder-walker": "^2.2.1",
     "bluebird": "^3.7.2",
-    "chalk": "^5.6.2",
     "del": "^8.0.1",
     "delay": "^7.0.0",
     "immer": "^10.0.2",

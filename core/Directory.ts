@@ -1,7 +1,6 @@
 import { Stats } from 'node:fs'
 import fs from 'node:fs/promises'
 import pathUtil from 'node:path'
-import chalk from 'chalk'
 import { debounce } from 'lodash'
 import sane, { type Watcher as SaneWatcher } from 'sane'
 import { createMatcher } from './createMatcher'
@@ -318,9 +317,7 @@ export class Directory {
             .then(() => onFilemapChange(this.files))
             .catch((error) => {
               if (this.logWatchErrors) {
-                console.error(
-                  chalk.red('wire Directory: error from watch subscriber'),
-                )
+                console.error('wire Directory: error from watch subscriber')
                 console.error(error)
               }
 
