@@ -6,18 +6,18 @@
  * Merging works like this: if a file is present in multiple outputs, the last one wins.
  *
  * NB. key order is standardised as of ES2015: https://stackoverflow.com/a/5525820
- * (respects the order, except for number-like keys)
+ * (respects assignment order, except for number-like keys)
  *
  * This is very similar to subset, except that it only takes glob strings, not any Matchable, so it can offer a more readable syntax for cases where you want to do a few things in parallel.
  */
 
 import { createMatcher } from '..'
-import { Snapshot, StrictTransform } from '../types'
+import type { Snapshot, StrictTransform } from '../types'
 
 export const branch =
   (
     transforms: Record<string, StrictTransform>,
-    keepUnmatched = true
+    keepUnmatched = true,
   ): StrictTransform =>
   async (input: Snapshot) => {
     const output: Snapshot = {}
@@ -33,11 +33,11 @@ export const branch =
       // exclude matched files from the next glob
       inputFiles = inputFiles.filter((name) => !matchedFiles.includes(name))
       const files = matchedFiles.reduce((acc, name) => {
-        acc[name] = input[name]
+        acc[name] = input[name] as Buffer
         return acc
       }, {} as Snapshot)
 
-      jobs[glob] = Promise.resolve(transforms[glob](files))
+      jobs[glob] = Promise.resolve(transforms[glob]!(files))
     }
 
     await Promise.all(Object.values(jobs))
@@ -50,7 +50,7 @@ export const branch =
     if (keepUnmatched) {
       // add the files that didn't match any glob, but also weren't output by a transform
       for (const name of inputFiles) {
-        if (!output[name]) output[name] = input[name]
+        if (!output[name]) output[name] = input[name]!
       }
     }
 

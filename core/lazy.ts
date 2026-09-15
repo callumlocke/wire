@@ -12,7 +12,7 @@ import { resolveProps } from './resolveProps'
 type LazyBuilder = (
   content: Buffer,
   name: string,
-  include: Includer
+  include: Includer,
 ) => LazyBuildResult
 
 /**
@@ -86,7 +86,7 @@ export const lazy = (fn: LazyBuilder): StrictTransform => {
         const include: Includer = (importee) => {
           if (pathUtil.isAbsolute(importee))
             console.warn(
-              'include should not be used for absolute paths - ' + importee
+              'include should not be used for absolute paths - ' + importee,
             )
 
           // Register that buildPath imports importee
@@ -97,7 +97,7 @@ export const lazy = (fn: LazyBuilder): StrictTransform => {
 
         // add a promise for the result of the user's lazy builder, and set it to actually start on the next tick
         promises[buildPath] = Promise.resolve().then(() =>
-          fn.call(null, content, buildPath, include)
+          fn.call(null, content, buildPath, include),
         )
       }
 
@@ -125,7 +125,7 @@ export const lazy = (fn: LazyBuilder): StrictTransform => {
         } else if (typeof result !== 'object') {
           throw new TypeError(
             "wire lazy: Callback's return value is of invalid type " +
-              `(${typeof result}) when building ${JSON.stringify(buildPath)}`
+              `(${typeof result}) when building ${JSON.stringify(buildPath)}`,
           )
         }
 
@@ -138,11 +138,11 @@ export const lazy = (fn: LazyBuilder): StrictTransform => {
 
             if (otherInputFile) {
               throw new Error(
-                `wire lazy: When building ${JSON.stringify(buildPath)}` +
+                `wire lazy: When building ${JSON.stringify(buildPath)} ` +
                   `the fn tried to output to ${JSON.stringify(
-                    outputPath
+                    outputPath,
                   )}, but this has already ` +
-                  `been output by ${JSON.stringify(otherInputFile)}`
+                  `been output by ${JSON.stringify(otherInputFile)}`,
               )
             }
 
@@ -155,14 +155,14 @@ export const lazy = (fn: LazyBuilder): StrictTransform => {
           } else if (!(content instanceof Buffer)) {
             throw new TypeError(
               `wire lazy: Expected value for output file "${outputPath}" ` +
-                `to be string or Buffer; got ${typeof content}.`
+                `to be string or Buffer; got ${typeof content}.`,
             )
           }
 
           // make sure the path is normal (should be relative, with no "./" or "../")
           if (pathUtil.isAbsolute(outputPath)) {
             throw new Error(
-              `wire lazy: Expected a relative path, got: ${outputPath}`
+              `wire lazy: Expected a relative path, got: ${outputPath}`,
             )
           }
           outputPath = pathUtil.normalize(outputPath)

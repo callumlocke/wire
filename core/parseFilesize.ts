@@ -51,8 +51,8 @@ export const parseFilesize = (input: string | number, base: 2 | 10 = 2) => {
   const parsed = String(input).match(/^([0-9\.,]*)(?:\s*)?(.*)$/)
   if (!parsed) throw new Error(`Invalid filesize string: ${input}`)
 
-  const amount = parsed[1].replace(',', '.')
-  const unit = parsed[2]
+  const amount = parsed[1]!.replace(',', '.')
+  const unit = parsed[2]!
 
   const validUnit = (sourceUnit: string) => sourceUnit === unit
 
@@ -64,7 +64,7 @@ export const parseFilesize = (input: string | number, base: 2 | 10 = 2) => {
   const increments = incrementBases[base]
 
   for (let i = 0; i < increments.length; i++) {
-    const increment = increments[i]
+    const increment = increments[i]!
 
     if (increment[0].some(validUnit))
       return Math.round(Number(amount) * increment[1])
