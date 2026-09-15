@@ -13,17 +13,17 @@ export type Snapshottish = /*Filemap |*/ z.infer<typeof filemappishSchema>
 
 /** Any function that takes a filemap and returns a filemap, either synchronously or asynchronously. */
 export type StrictTransform = (
-  filemap: Snapshot
+  filemap: Snapshot,
 ) => Promise<Snapshot> | Snapshot
 
 /** Loose input, strict output. */
 export type PermissiveTransform = (
-  filemappish: Snapshottish
+  filemappish: Snapshottish,
 ) => Promise<Snapshot> | Snapshot
 
 /** Strict input, loose output. */
 export type Transformish = (
-  filemap: Snapshot
+  filemap: Snapshot,
 ) => Promise<Snapshottish> | Snapshottish
 
 // /** Loose input and output. */

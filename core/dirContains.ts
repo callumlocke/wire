@@ -4,7 +4,7 @@ import path from 'node:path'
 
 export const dirContains = (
   dirPath: string,
-  possibleSubPath: string
+  possibleSubPath: string,
 ): boolean => {
   const relative = path.relative(dirPath, possibleSubPath)
   return (

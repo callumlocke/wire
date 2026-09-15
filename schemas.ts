@@ -8,13 +8,13 @@ export const filemapSchema = z.record(bufferSchema)
 
 /** Validates a filemappish object */
 export const filemappishSchema = z.record(
-  z.union([bufferSchema, z.string()]).nullish()
+  z.union([bufferSchema, z.string()]).nullish(),
 )
 
 /** Validates a transform function */
 export const transformSchema = z.function(
   z.tuple([filemapSchema]),
-  z.union([filemapSchema, z.promise(filemapSchema)])
+  z.union([filemapSchema, z.promise(filemapSchema)]),
 )
 
 /** Validates a matchable */

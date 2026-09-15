@@ -8,8 +8,8 @@ import type { Snapshot, FilemapPatch, StrictTransform } from '../types'
 export const withPatch = (
   transformWithPatch: (
     input: Snapshot,
-    patch: FilemapPatch
-  ) => Promise<Snapshot> | Snapshot
+    patch: FilemapPatch,
+  ) => Promise<Snapshot> | Snapshot,
 ): StrictTransform => {
   let previousFiles: Snapshot = {}
 

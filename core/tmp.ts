@@ -24,9 +24,9 @@ export const tmp = (
   callback: (
     input: Directory,
     output: Directory,
-    names: Set<string>
+    names: Set<string>,
   ) => Promise<void> | void,
-  root?: string
+  root?: string,
 ) => {
   const tmpRoot = root ? root : path.resolve(process.cwd(), '.wire', 'tmp')
   const inputPath = path.resolve(tmpRoot, 'input')

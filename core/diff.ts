@@ -9,7 +9,7 @@ import { castSnapshot } from './castSnapshot'
 
 export const diff = (
   input: Snapshottish,
-  output: Snapshottish
+  output: Snapshottish,
 ): Readonly<FilemapPatch> => {
   const inputFilemap = castSnapshot(input)
   const outputFilemap = castSnapshot(output)

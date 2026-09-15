@@ -24,7 +24,7 @@ describe('singleFile()', () => {
     // first verify that the the test function works concurrently, as normal
     {
       const calls = Array.from({ length: 10 }).map((x, i) =>
-        bareFunction(i, Boolean(i % 2))
+        bareFunction(i, Boolean(i % 2)),
       )
 
       await Promise.all(calls)
@@ -41,7 +41,7 @@ describe('singleFile()', () => {
       const wrappedFunction = singleFile(bareFunction)
 
       const calls = Array.from({ length: 10 }).map((x, i) =>
-        wrappedFunction(i, Boolean(i % 2))
+        wrappedFunction(i, Boolean(i % 2)),
       )
 
       await Promise.all(calls)

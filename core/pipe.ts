@@ -20,7 +20,7 @@ export const pipe = (
   ...fns: Array<StrictTransform | Transformish | null>
 ): PermissiveTransform => {
   const pipedTransform: PermissiveTransform = async (
-    incomingFiles: Snapshottish = {}
+    incomingFiles: Snapshottish = {},
   ) => {
     let output = castSnapshot(incomingFiles)
 

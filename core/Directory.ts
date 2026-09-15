@@ -112,7 +112,7 @@ export class Directory {
       !dirContains(process.cwd(), this.absolutePath)
     ) {
       throw new Error(
-        'wire Directory: Cannot work outside CWD unless you set force:true'
+        'wire Directory: Cannot work outside CWD unless you set force:true',
       )
     }
 
@@ -197,7 +197,7 @@ export class Directory {
    */
   private whenIdle<R>(queuableFunction: () => R | Promise<R>): Promise<R> {
     const result = Promise.resolve(this.queuedOperations).then(() =>
-      queuableFunction()
+      queuableFunction(),
     )
 
     this.queuedOperations = result
@@ -269,7 +269,7 @@ export class Directory {
             // the patch says this file has changed.
             // write the file to disk
             await ensureDir(
-              pathUtil.dirname(pathUtil.join(this.absolutePath, name))
+              pathUtil.dirname(pathUtil.join(this.absolutePath, name)),
             )
             await fs.writeFile(pathUtil.join(this.absolutePath, name), content)
 
@@ -279,14 +279,14 @@ export class Directory {
             newMtimes[name] = Date.now() // nb. must record time after writing, not before
             newFiles[name] = content
           }
-        })
+        }),
       )
 
       // now all files are deleted, prune any empty directories in series
       for (const deletion of deletions) {
         await deleteEmptyParents(
           pathUtil.resolve(this.absolutePath, deletion),
-          this.absolutePath
+          this.absolutePath,
         )
       }
 
@@ -304,7 +304,7 @@ export class Directory {
    * Returns a promise that resolves after the first call to your subscriber (and after resolution of any promise returned by your subscriber, if applicable).
    */
   public watch(
-    onFilemapChange: (filemap: Snapshot) => any
+    onFilemapChange: (filemap: Snapshot) => any,
     // options?:
   ): Promise<void> {
     return this.whenIdle((): Promise<void> => {
@@ -319,7 +319,7 @@ export class Directory {
             .catch((error) => {
               if (this.logWatchErrors) {
                 console.error(
-                  chalk.red('wire Directory: error from watch subscriber')
+                  chalk.red('wire Directory: error from watch subscriber'),
                 )
                 console.error(error)
               }
@@ -350,7 +350,7 @@ export class Directory {
 
           this.mtimes[path] = Date.now()
           this.files[path] = await fs.readFile(
-            pathUtil.join(this.absolutePath, path)
+            pathUtil.join(this.absolutePath, path),
           )
           notify()
         }

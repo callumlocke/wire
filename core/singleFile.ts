@@ -16,10 +16,10 @@
 export const singleFile = <
   Args extends unknown[],
   ReturnValue extends unknown,
-  Context
+  Context,
 >(
   callback: (...args: Args) => ReturnValue | Promise<ReturnValue>,
-  context?: Context
+  context?: Context,
 ) => {
   let queue: Promise<ReturnValue>
 

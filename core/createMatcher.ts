@@ -3,7 +3,7 @@ import type { Matchable, Matcher } from '../types'
 
 const compileGlobMatcher = (
   glob: string,
-  options?: PicomatchOptions
+  options?: PicomatchOptions,
 ): Matcher => {
   const re = picomatch.makeRe(glob, options)
   return (name) => re.test(name)
@@ -32,7 +32,7 @@ const memo: WeakSet<Matcher> = new WeakSet()
 
 export const createMatcher = (
   filter: Matchable = '**',
-  options?: PicomatchOptions
+  options?: PicomatchOptions,
 ): Matcher => {
   // Return from cache if it's already a matcher and no special options are given
   if (!options && memo.has(filter as Matcher)) return filter as Matcher
@@ -59,14 +59,14 @@ export const createMatcher = (
 
           if (typeof p !== 'string') {
             throw new TypeError(
-              'createMatcher: Arrays can only contain strings.'
+              'createMatcher: Arrays can only contain strings.',
             )
           }
 
           if (p[0] === '!') {
             if (i === 0) {
               throw new Error(
-                'createMatcher: First glob in an array cannot be negative'
+                'createMatcher: First glob in an array cannot be negative',
               )
             }
 
@@ -96,7 +96,7 @@ export const createMatcher = (
         match = (name) => filter.test(name)
       } else {
         throw new TypeError(
-          `createMatcher: Unexpected pattern type: ${typeof filter}`
+          `createMatcher: Unexpected pattern type: ${typeof filter}`,
         )
       }
     }

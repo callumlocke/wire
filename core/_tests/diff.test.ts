@@ -24,13 +24,13 @@ test('diff', () => {
 
   assert(
     patch.b && decoder.decode(patch.b) === 'TWO',
-    'Modified files should be included'
+    'Modified files should be included',
   )
 
   assert(patch.c === null, 'Deletions should be represented as explicit nulls')
 
   assert(
     patch.d && decoder.decode(patch.d) === '4',
-    'New files should be included'
+    'New files should be included',
   )
 })

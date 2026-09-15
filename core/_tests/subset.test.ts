@@ -10,8 +10,8 @@ test('subset()', async () => {
         ...acc,
         [path]: content.toString().toUpperCase(),
       }),
-      {}
-    )
+      {},
+    ),
   )
 
   const output = await transform(
@@ -19,7 +19,7 @@ test('subset()', async () => {
       'foo/yep.txt': 'this one',
       'foo/another.txt': 'and this one',
       'bar/no.txt': 'but not this one',
-    })
+    }),
   )
 
   expect(Object.keys(output).length).toBe(3)
@@ -30,7 +30,7 @@ test('subset()', async () => {
         'foo/yep.txt': 'THIS ONE',
         'foo/another.txt': 'AND THIS ONE',
         'bar/no.txt': 'but not this one',
-      })
-    ).length
+      }),
+    ).length,
   ).toBe(0)
 })

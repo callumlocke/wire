@@ -7,7 +7,7 @@ type AwaitedValues<T> = {
  */
 
 export const resolveProps = async <Input extends Record<string, unknown>>(
-  inputObject: Input
+  inputObject: Input,
 ): Promise<AwaitedValues<Input>> => {
   const keys = Object.keys(inputObject) as (keyof Input)[]
   const values = Object.values(inputObject) as Input[keyof Input][]

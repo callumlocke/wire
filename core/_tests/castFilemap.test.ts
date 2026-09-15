@@ -9,7 +9,7 @@ describe('castFilemap()', () => {
         '1.txt': 'One',
         './2.txt': 'Two',
         'foo/../3.txt': Buffer.from('Three'),
-      })
+      }),
     ).toMatchObject({
       '1.txt': Buffer.from('One'),
       '2.txt': Buffer.from('Two'),

@@ -19,7 +19,7 @@ test('pipe()', async () => {
     null,
 
     // uppercase all contents
-    lazy((content) => content.toString().toUpperCase())
+    lazy((content) => content.toString().toUpperCase()),
   )
 
   const result = await transform({ foo: Buffer.from('foo') })
@@ -29,6 +29,6 @@ test('pipe()', async () => {
       foo: 'FOO',
       bar: 'BAR',
       baz: 'BAZ',
-    })
+    }),
   ).toBeEmptyObject()
 })
