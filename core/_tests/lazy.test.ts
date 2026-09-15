@@ -7,7 +7,7 @@ import { diff } from '../diff'
 import type { Snapshot } from '../../types'
 
 /**
- * Helper to sort an array of calls (to a Jest mock function) so they may be compared for equality
+ * Helper to sort an array of calls (to a mock function) so they may be compared for equality
  * with another array of calls, when call order doesn't matter.
  */
 const sortCalls = (calls: Array<Array<any>>) =>
@@ -65,7 +65,7 @@ test('cache() returns a caching transform', async () => {
   // 2. modifying a single file
   spy.mockReset()
   input = { ...input, 'foo.bar': Buffer.from('updated misc contents!') }
-  input = output = await transform(input)
+  output = await transform(input)
 
   expect(0).toBe(
     Object.keys(
@@ -78,15 +78,10 @@ test('cache() returns a caching transform', async () => {
   )
 
   expect(spy.mock.calls).toEqual([['foo.bar']])
-  // expect(1).toBe(spy.mock.calls.length);
-  // expect(spy.mock.calls[0][0]).toBe('foo.bar');
 
   // 3. modifiying an importee
   spy.mockReset()
   input = { ...input, 'banner.txt': Buffer.from('Copyright Zebra 2051') }
-
-  return
-  // TODO fix the rest
 
   output = await transform(input)
   expect(0).toBe(
@@ -118,8 +113,6 @@ test('cache() returns a caching transform', async () => {
     ).length,
   )
 
-  // expect(1).toBe(spy.mock.calls.length);
-  // expect(spy.calledWith('something.js')).toBe(true);
   expect(spy.mock.calls).toEqual([['something.js']])
 
   // 5. adding a new file
@@ -139,8 +132,7 @@ test('cache() returns a caching transform', async () => {
       }),
     ).length,
   )
-  // expect(1).toBe(spy.mock.calls.length);
-  // expect(spy.calledWith('another.js')).toBe(true);
+
   expect(spy.mock.calls).toEqual([['another.js']])
 
   // 6. changing the imported banner and one of the scripts at the same time
@@ -196,7 +188,7 @@ test('cache() returns a caching transform', async () => {
 })
 
 test('cache() stress test', async () => {
-  // this is just for informal observations.
+  // more of a benchmark/sanity test
 
   const transform = lazy((content, name, include) => {
     if (name === 'banner.txt') return null
