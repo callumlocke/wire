@@ -1,5 +1,9 @@
-import type { z } from 'zod'
-import { filemapSchema, filemappishSchema, matchableSchema } from './schemas'
+import type * as z from 'zod/mini'
+import type {
+  filemapSchema,
+  filemappishSchema,
+  matchableSchema,
+} from './schemas'
 
 /**
  * A plain object representing a directory of files on disk. Should always be treated as read-only.

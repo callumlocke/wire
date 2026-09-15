@@ -1,21 +1,22 @@
-import { z } from 'zod'
+import * as z from 'zod/mini'
 
 /** Validates a node Buffer */
 const bufferSchema = z.custom<Buffer>((val) => Buffer.isBuffer(val))
 
 /** Validates a filemap */
-export const filemapSchema = z.record(bufferSchema)
+export const filemapSchema = z.record(z.string(), bufferSchema)
 
 /** Validates a filemappish object */
 export const filemappishSchema = z.record(
-  z.union([bufferSchema, z.string()]).nullish(),
+  z.string(),
+  z.nullish(z.union([bufferSchema, z.string()])),
 )
 
-/** Validates a transform function */
-export const transformSchema = z.function(
-  z.tuple([filemapSchema]),
-  z.union([filemapSchema, z.promise(filemapSchema)]),
-)
+/** Validates a transform function. Use .implementAsync() for async transforms. */
+export const transformSchema = z.function({
+  input: [filemapSchema],
+  output: filemapSchema,
+})
 
 /** Validates a matchable */
 export const matchableSchema = z.union([
@@ -24,5 +25,5 @@ export const matchableSchema = z.union([
   z.string(),
   z.boolean(),
   z.null(),
-  z.function().args(z.string()),
+  z.function({ input: [z.string()] }),
 ])
