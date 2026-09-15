@@ -23,7 +23,6 @@ export const matchableSchema = z.union([
   z.array(z.string()),
   z.string(),
   z.boolean(),
-  z.undefined(),
   z.null(),
   z.function().args(z.string()),
 ])

@@ -1,11 +1,11 @@
-import micromatch from 'micromatch'
+import picomatch, { type PicomatchOptions } from 'picomatch'
 import type { Matchable, Matcher } from '../types'
 
 const compileGlobMatcher = (
   glob: string,
-  options?: micromatch.Options // TODO
+  options?: PicomatchOptions
 ): Matcher => {
-  const re = micromatch.makeRe(glob, options)
+  const re = picomatch.makeRe(glob, options)
   return (name) => re.test(name)
 }
 
@@ -14,59 +14,56 @@ const alwaysFalse = () => false
 
 const memo: WeakSet<Matcher> = new WeakSet()
 
-type CreateMatcherOptions = {
-  globOptions?: micromatch.Options
-}
-
 /**
- * Creates a function for checking if a filename matches certain criteria.
+ * Creates a reusable function for checking if a file path matches your `filter`.
  *
- * Very permissive in what it accepts, but always returns `(string) => boolean`.
- *
- * `criteria` may be:
+ * `filter` may be:
  * - a glob string like `'**'`
  * - an array of glob strings like `['**', '!*.js']`
  * - a regular expression
- * - any function (it will be called with the test string and its return value will be taken as boolean)
+ * - any function
  * - a boolean (`true` matches everything, `false` matches nothing)
  *
- * If an array is passed, the globs are processed in order from left to right. A negative glob can unmatch something that has thus far been matched. So if you want to match everything except `*.js` files, you would do `['**', '!*.js']`. This implies that the first glob can never be negative, as it would have no effect - if you try to do that, an error will be thrown.
+ * If an array is passed, the globs are processed in order from left to right. To be considered a match, the file path must match at least one of the globs *and* not be 'unmatched' by a subsequent negative glob.
+ *
+ * @example
+ * ['foo/*', 'foo/!*.js'] // matches non-JS children of `foo`.
  */
+
 export const createMatcher = (
-  criteria: Matchable = '**',
-  options?: CreateMatcherOptions
+  filter: Matchable = '**',
+  options?: PicomatchOptions
 ): Matcher => {
   // Return from cache if it's already a matcher and no special options are given
-  if (!options && memo.has(criteria as Matcher)) return criteria as Matcher
+  if (!options && memo.has(filter as Matcher)) return filter as Matcher
 
-  let matcher: Matcher
+  let match: Matcher
 
-  switch (criteria) {
-    case false:
-      return alwaysFalse
+  switch (filter) {
     case true:
       return alwaysTrue
+    case false:
     case '':
-      throw new Error('createMatcher: Pattern cannot be an empty string')
+      return alwaysFalse
 
     default: {
-      if (typeof criteria === 'string') {
-        matcher = compileGlobMatcher(criteria, options?.globOptions)
-      } else if (Array.isArray(criteria)) {
-        const l = criteria.length
+      if (typeof filter === 'string') {
+        match = compileGlobMatcher(filter, options)
+      } else if (Array.isArray(filter)) {
+        const l = filter.length
         const matchers: Matcher[] = []
         const results: boolean[] = []
 
         for (let i = 0; i < l; i += 1) {
-          const p = criteria[i]
+          const p = filter[i]
 
           if (typeof p !== 'string') {
             throw new TypeError(
-              'createMatcher: When pattern is an array, it must only contain strings.'
+              'createMatcher: Arrays can only contain strings.'
             )
           }
 
-          if (p.charAt(0) === '!') {
+          if (p[0] === '!') {
             if (i === 0) {
               throw new Error(
                 'createMatcher: First glob in an array cannot be negative'
@@ -74,41 +71,38 @@ export const createMatcher = (
             }
 
             results[i] = false
-            matchers[i] = compileGlobMatcher(
-              p.substring(1),
-              options?.globOptions
-            )
+            matchers[i] = compileGlobMatcher(p.substring(1), options)
           } else {
             results[i] = true
-            matchers[i] = compileGlobMatcher(p, options?.globOptions)
+            matchers[i] = compileGlobMatcher(p, options)
           }
         }
 
-        matcher = (name) => {
+        match = (name) => {
           let matched = false
 
           for (let i = 0; i < l; i += 1) {
-            const currentMatcher = matchers[i]
+            const current = matchers[i]!
             if (results[i]) {
-              if (currentMatcher(name)) matched = true
-            } else if (currentMatcher(name)) matched = false
+              if (current(name)) matched = true
+            } else if (current(name)) matched = false
           }
 
           return matched
         }
-      } else if (typeof criteria === 'function') {
-        matcher = (name) => Boolean(criteria(name))
-      } else if (criteria instanceof RegExp) {
-        matcher = (name) => criteria.test(name)
+      } else if (typeof filter === 'function') {
+        match = (name) => Boolean(filter(name))
+      } else if (filter instanceof RegExp) {
+        match = (name) => filter.test(name)
       } else {
         throw new TypeError(
-          `createMatcher: Unexpected pattern type: ${typeof criteria}`
+          `createMatcher: Unexpected pattern type: ${typeof filter}`
         )
       }
     }
   }
 
-  if (!options) memo.add(matcher)
+  if (!options) memo.add(match)
 
-  return matcher
+  return match
 }

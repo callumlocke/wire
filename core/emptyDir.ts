@@ -25,6 +25,7 @@ export async function emptyDir(dir: string) {
   // Directory already exists - delete any items found in it
   while (items.length) {
     const item = items.shift()
+
     if (item) {
       const filepath = pathUtil.join(dir, item)
       await fs.rm(filepath, { recursive: true })

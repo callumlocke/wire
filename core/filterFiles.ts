@@ -1,13 +1,13 @@
 import { createMatcher } from './createMatcher'
-import { Filemap, Matchable } from '../types'
+import type { Snapshot, Matchable } from '../types'
 
 /**
- * Filters a filemap by filename.
+ * Filters a filemap by checking the keys agasint the given `filter`.
  */
-export const filterFiles = (files: Filemap, filter: Matchable): Filemap => {
+export const filterFiles = (files: Snapshot, filter: Matchable): Snapshot => {
   const match = createMatcher(filter)
 
-  const output: Filemap = {}
+  const output: Snapshot = {}
 
   for (const [name, content] of Object.entries(files))
     if (match(name)) output[name] = content

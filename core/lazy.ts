@@ -1,38 +1,60 @@
 import pathUtil from 'path'
 import { produce } from 'immer'
-import type {
-  LazyBuilder,
-  Transform,
-  Filemap,
-  Includer,
-  LazyBuildresult,
-} from '../types'
-import { castFilemap } from './castFilemap'
+import type { StrictTransform, Snapshot } from '../types'
+import { castSnapshot } from './castSnapshot'
 import { diff } from './diff'
 import { PairSet } from './PairSet'
 import { resolveProps } from './resolveProps'
 
 /**
- * Returns an async transform that, when passed a filemap, runs your callback once for every file. Your callback decides what to output for the given input file – it may output the file as-is, or a buffer/string of new contents to replace the file, or `null` to exclude that file from the output, or a plain object detailing multiple files to output instead of the original file.
+ * Callback function for `lazy` transforms. Determines what should be output in place of a single input file.
+ */
+type LazyBuilder = (
+  content: Buffer,
+  name: string,
+  include: Includer
+) => LazyBuildResult
+
+/**
+ * Return value of a lazy builder. Specifies file(s) to output in place of the input file.
  *
- * The returned transform retains an internal memo of which output files were triggered by which input files on each invocation. It uses this, in combination with a diff comparing the incoming filemap to the incoming filemap from the previous invocation, to determine which files actually need to be built again after a change (even if the change was to an included file, rather than the file itself). In many cases it's just one or two files, and their results are simply combined with the output from the previous invocation.
+ * Meaning of each value type:
+ * - `null` - exclude this file from the output
+ * - `Buffer` or `string` - include this file in the output, with the given content
+ * -
+ */
+type LazyBuildResult = Buffer | string | Record<string, Buffer | string> | null
+
+/** Callback used for including another file during a granular build. */
+type Includer = (filename: string) => Buffer | null
+
+/**
+ * Returns an async transform that, when passed a filemap, runs your callback once for every file that may have changed, and all of their dependents (files your callback requests through the `Includer` function passed into it).
+ *
+ * Your callback decides what to output for the given input file – it may output the file as-is, or a buffer/string of new contents to replace the file, or `null` to exclude that file from the output, or a plain object detailing multiple files to output instead of the original file.
+ *
+ * How it
+ *
+ * On subsequent calls with new filemaps, runs only on files that were just edited, or any files that were included last time if they still exist
+ *
+ * If a file is deleted between calls.
  *
  * @public
  */
 
-export const lazy = (fn: LazyBuilder): Transform => {
+export const lazy = (fn: LazyBuilder): StrictTransform => {
   let importations = new PairSet()
   let dependencies = new PairSet()
-  let rememberedInput: Filemap
-  let rememberedOutput: Filemap
-  let queue = Promise.resolve(castFilemap())
+  let rememberedInput: Snapshot
+  let rememberedOutput: Snapshot
+  let queue = Promise.resolve(castSnapshot())
 
-  const lazyTransform: Transform = (_input) => {
+  const lazyTransform: StrictTransform = (_input) => {
     queue = queue.then(async () => {
       // normalize input
-      const input = castFilemap(_input)
+      const input = castSnapshot(_input)
 
-      // get things from last time
+      // get things from last call to the transform
       const oldInput = rememberedInput
       const oldImportations = importations
       const oldDependencies = dependencies
@@ -46,29 +68,26 @@ export const lazy = (fn: LazyBuilder): Transform => {
 
       // decide which files we need to build - produce a copy of the changedInput patch, adding any files that, on the previous call, imported any file that has changed on _this_ call
       const filesToBuild = produce(changedInput, (draft) => {
-        for (const [buildPath, importPath] of oldImportations) {
-          if (changedInput[importPath]) {
+        for (const [buildPath, importPath] of oldImportations)
+          if (changedInput[importPath])
             draft[buildPath] = input[buildPath] || null
-          }
-        }
       })
 
       // create list of file names affected by the updated patch, including for deleted files (null values), plus augmented with anything from the previous build that imported anything changed on this call
       const namesAffectedByBuild = Object.keys(filesToBuild)
 
       // create an object for promises, each one resolving with a LazyBuildResult, keyed by the name of the file that we want to build with the user's granular transform (typically starting with a file that got edited on disk, followed by adding entries for any other files that were either imported by this file or imported by dependencies of this file or otherwise changed/deleted)
-      const promises: Record<string, Promise<LazyBuildresult>> = {}
+      const promises: Record<string, Promise<LazyBuildResult>> = {}
 
       for (const [buildPath, content] of Object.entries(filesToBuild)) {
         if (!content) continue
 
         // create a unique includer function for this build of this file
         const include: Includer = (importee) => {
-          if (pathUtil.isAbsolute(importee)) {
+          if (pathUtil.isAbsolute(importee))
             console.warn(
               'include should not be used for absolute paths - ' + importee
             )
-          }
 
           // Register that buildPath imports importee
           newImportations.add(buildPath, importee)
@@ -85,10 +104,6 @@ export const lazy = (fn: LazyBuilder): Transform => {
       // await them all in parallel
       const results = await resolveProps(promises)
 
-      // for (const [buildPath, result] of Object.entries(results)) {
-      //   if (!results[buildPath]) delete results[buildPath]
-      // }
-
       // status: the files have all been built, and we have a results object containing immediate LazyBuildResults. newImportations has been fully popuated.
 
       // record output paths so we can check that no path gets output from two different inputs
@@ -101,7 +116,7 @@ export const lazy = (fn: LazyBuilder): Transform => {
       for (const buildPath of buildPaths) {
         const r = results[buildPath]
         if (!r) continue
-        let result: LazyBuildresult = r
+        let result: LazyBuildResult = r
 
         // normalise the result format to Record<string, Buffer | string> if not already
         if (result instanceof Buffer || typeof result === 'string') {
@@ -206,7 +221,7 @@ export const lazy = (fn: LazyBuilder): Transform => {
       }
 
       // finalise output
-      const output = castFilemap(outputWrites)
+      const output = castSnapshot(outputWrites)
 
       // remember state for next time
       importations = newImportations

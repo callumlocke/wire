@@ -1,5 +1,5 @@
-import type { Filemappish, FilemapPatch } from '../types'
-import { castFilemap } from './castFilemap'
+import type { Snapshottish, FilemapPatch } from '../types'
+import { castSnapshot } from './castSnapshot'
 
 /**
  * Get an object detailing the differences between two filemaps, `input` and `output`.
@@ -8,11 +8,11 @@ import { castFilemap } from './castFilemap'
  */
 
 export const diff = (
-  input: Filemappish,
-  output: Filemappish
+  input: Snapshottish,
+  output: Snapshottish
 ): Readonly<FilemapPatch> => {
-  const inputFilemap = castFilemap(input)
-  const outputFilemap = castFilemap(output)
+  const inputFilemap = castSnapshot(input)
+  const outputFilemap = castSnapshot(output)
 
   // start with a blank map
   const changes: FilemapPatch = {}

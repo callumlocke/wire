@@ -12,16 +12,19 @@
  */
 
 import { createMatcher } from '..'
-import { Filemap, Transform } from '../types'
+import { Snapshot, StrictTransform } from '../types'
 
 export const branch =
-  (transforms: Record<string, Transform>, keepUnmatched = true): Transform =>
-  async (input: Filemap) => {
-    const output: Filemap = {}
+  (
+    transforms: Record<string, StrictTransform>,
+    keepUnmatched = true
+  ): StrictTransform =>
+  async (input: Snapshot) => {
+    const output: Snapshot = {}
     await Promise.resolve()
 
     let inputFiles = Object.keys(input)
-    const jobs: Record<string, Promise<Filemap>> = {}
+    const jobs: Record<string, Promise<Snapshot>> = {}
 
     for (const glob of Object.keys(transforms)) {
       const match = createMatcher(glob)
@@ -32,7 +35,7 @@ export const branch =
       const files = matchedFiles.reduce((acc, name) => {
         acc[name] = input[name]
         return acc
-      }, {} as Filemap)
+      }, {} as Snapshot)
 
       jobs[glob] = Promise.resolve(transforms[glob](files))
     }

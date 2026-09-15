@@ -2,20 +2,31 @@
   "name": "wire",
   "dependencies": {
     "@nodelib/fs.walk": "^2.0.0",
+    "@types/mkdirp-promise": "^5.0.0",
+    "@types/picomatch": "^4.0.3",
+    "@types/pretty-hrtime": "^1.0.3",
     "async-folder-walker": "^2.2.1",
     "bluebird": "^3.7.2",
-    "bun-types": "^1.0.1",
-    "chalk": "^5.3.0",
+    "chalk": "^5.6.2",
+    "del": "^8.0.1",
+    "delay": "^7.0.0",
     "immer": "^10.0.2",
-    "lodash": "^4.17.21",
-    "micromatch": "^4.0.5",
+    "lodash": "^4.18.1",
+    "micromatch": "^4.0.8",
+    "mkdirp-promise": "^5.0.1",
+    "picomatch": "^4.0.7",
+    "pretty-hrtime": "^1.0.3",
     "sane": "^5.0.1",
+    "tempy": "^3.2.0",
     "zod": "^3.22.2"
   },
   "devDependencies": {
-    "@types/glob-to-regexp": "^0.4.1",
-    "@types/lodash": "^4.14.198",
-    "@types/micromatch": "^4.0.2",
-    "@types/sane": "^2.0.1"
+    "@types/bun": "^1.4.2",
+    "@types/glob-to-regexp": "^0.4.4",
+    "@types/lodash": "^4.17.25",
+    "@types/micromatch": "^4.0.10",
+    "@types/node": "^25.0.3",
+    "@types/sane": "^2.0.9",
+    "typescript": "^7.0.2"
   }
 }

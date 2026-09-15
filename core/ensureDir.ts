@@ -1,7 +1,7 @@
 import { promises as fs } from 'fs'
 
 /**
- * Ensures that a directory exists at the given path. Conceptually similar to `mkdir -p`.
+ * Ensures that a directory exists at the given path.
  */
 
 export const ensureDir = async (dir: string): Promise<void> => {

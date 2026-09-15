@@ -1,7 +1,9 @@
 /**
- * A 'set' of **ordered pairs**, also known as "2-tuples.
+ * Class representing a set of 2-tuples (ordered pairs).
  *
- * The API is based on `Set`, but the `add`, `has` and `delete` methods each take two arguments instead of one. As with the native `Set`, adding an existing pair has no effect. For comparison purposes, order matters - `[a,b]` and `[b,a]` are considered different pairs.
+ * The API is based on `Set`, but the `add`, `has` and `delete` methods each take two arguments instead of one.
+ *
+ * As with the native `Set`, adding an existing pair has no effect. For comparison purposes, order matters - `[a,b]` and `[b,a]` are considered different pairs.
  */
 
 export class PairSet<L = string, R = string> implements Iterable<[L, R]> {
@@ -55,9 +57,7 @@ export class PairSet<L = string, R = string> implements Iterable<[L, R]> {
     return this
   }
 
-  /**
-   * Removes a pair from the set. Has no effect if the pair does not exist.
-   */
+  /** Removes a pair from the set. Has no effect if the pair does not exist. */
   delete(left: L, right: R): boolean {
     const { _lefts, _rights, _size } = this
 
@@ -95,9 +95,8 @@ export class PairSet<L = string, R = string> implements Iterable<[L, R]> {
 
     const results = new Set<R>()
 
-    for (let i = 0; i < _size; i += 1) {
+    for (let i = 0; i < _size; i += 1)
       if (_lefts[i] === left) results.add(_rights[i] as R)
-    }
 
     return results
   }

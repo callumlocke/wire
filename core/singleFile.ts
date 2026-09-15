@@ -1,5 +1,16 @@
 /**
- * Wraps an async callback to ensure that only one invocation can occur at a time. If multiple concurrent invocations are attempted, they are automatically queued and executed in order. It doesn't matter if an invocation is fulfilled or rejected; subsequent queued invocations still run.
+ * Wraps an async callback to so it runs in 'single file', i.e. concurrency of 1. Each call is queued by the wrapper until any pending calls are settled.
+ *
+ * Example:
+ *
+ * ```
+ * const one = singleFile(async () => { await delay(1000); console.log(1) })
+ * const two = singleFile(() => { console.log(2) })
+ *
+ * one() // not awaited
+ * two()
+ * // (waits one second, then logs 1, then 2)
+ * ```
  */
 
 export const singleFile = <

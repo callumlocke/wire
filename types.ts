@@ -6,13 +6,30 @@ import { filemapSchema, filemappishSchema, matchableSchema } from './schemas'
  *
  * Every key is a root-relative file path like `index.html` or `style/main.css`. Every value is a `Buffer` containing the complete file contents.
  */
-export type Filemap = z.infer<typeof filemapSchema>
+export type Snapshot = z.infer<typeof filemapSchema>
 
-/** Like a Filemap but less strict - allows string and null values. */
-export type Filemappish = z.infer<typeof filemappishSchema>
+/** Like a `Snapshot` but less strict - allows string and null values. */
+export type Snapshottish = /*Filemap |*/ z.infer<typeof filemappishSchema>
 
 /** Any function that takes a filemap and returns a filemap, either synchronously or asynchronously. */
-export type Transform = (filemap: Filemap) => Promise<Filemap> | Filemap
+export type StrictTransform = (
+  filemap: Snapshot
+) => Promise<Snapshot> | Snapshot
+
+/** Loose input, strict output. */
+export type PermissiveTransform = (
+  filemappish: Snapshottish
+) => Promise<Snapshot> | Snapshot
+
+/** Strict input, loose output. */
+export type Transformish = (
+  filemap: Snapshot
+) => Promise<Snapshottish> | Snapshottish
+
+// /** Loose input and output. */
+// export type Transformish =
+//   | Transform
+//   | ((filemappish: Filemappish) => Promise<Filemappish> | Filemappish)
 
 /**
  * Details the differences between two filemaps. Eg, if you read a filemap from disk at different times, you can use `diff` to get a patch telling you what's changed in the interim.
@@ -28,28 +45,3 @@ export type Matchable = z.infer<typeof matchableSchema>
 
 /** Any function that returns `true` or `false` for a given filename. */
 export type Matcher = (name: string) => boolean
-
-/** Callback used for including another file during a granular build. */
-export type Includer = (filename: string) => Buffer | null
-
-/**
- * Return value of a `LazyBuilder` function. Specifies file(s) to output in place of the single input file.
- *
- * Meaning of each value type:
- * - `null` - exclude this file from the output
- * - `Buffer` or `string` - include this file in the output, with the given content
- */
-export type LazyBuildresult =
-  | Buffer
-  | string
-  | { [name: string]: Buffer | string }
-  | null
-
-/**
- * Callback function for `lazy` transforms. Determines what should be output in place of a single input file.
- */
-export type LazyBuilder = (
-  content: Buffer,
-  name: string,
-  include: Includer
-) => LazyBuildresult

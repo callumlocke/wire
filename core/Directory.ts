@@ -1,27 +1,17 @@
-// deno-lint-ignore-file no-explicit-any
 import { Stats } from 'node:fs'
 import fs from 'node:fs/promises'
-
 import pathUtil from 'node:path'
 import chalk from 'chalk'
 import { debounce } from 'lodash'
-import sane from 'sane'
-import type { Watcher as SaneWatcher } from 'sane'
-
-import { Filemap, Filemappish, Matchable, Matcher } from '../types'
+import sane, { type Watcher as SaneWatcher } from 'sane'
 import { createMatcher } from './createMatcher'
 import { parseFilesize } from './parseFilesize'
 import { diff } from './diff'
-import { castFilemap } from './castFilemap'
+import { castSnapshot } from './castSnapshot'
 import { asyncFolderWalker } from 'async-folder-walker'
 import { ensureDir } from './ensureDir'
-
-const dirContainsPath = (parent: string, possibleDescendentPath: string) => {
-  const relative = pathUtil.relative(parent, possibleDescendentPath)
-  return (
-    relative && !relative.startsWith('..') && !pathUtil.isAbsolute(relative)
-  )
-}
+import { dirContains } from './dirContains'
+import type { Snapshot, Snapshottish, Matchable, Matcher } from '../types'
 
 export type DirectoryOptions = {
   match: Matchable
@@ -41,16 +31,17 @@ const defaults: DirectoryOptions = {
   force: false,
 }
 
-/*
-  After `file` has been deleted, this is called to also delete its directory if now empty. Continues deleting parent directories until it encounters one that is not empty.
-*/
-async function pruneEmptyAncestors(file: string, until: string) {
-  if (until === file || !dirContainsPath(until, file)) return
+/**
+ * Removes empty subdirectories. For cleaning up after deleting `file`. Deletes the `file` parent (dirname) if it's now empty, then recurses to keep deleting empty parents until it hits a non-empty dir or `until`.
+ */
+
+async function deleteEmptyParents(file: string, until: string) {
+  if (until === file || !dirContains(until, file)) return
 
   const parent = pathUtil.dirname(file)
 
   // TODO investigate: can we do this, to avoid final (failed?) removal-attempt of `dist`? Or does it not do one anyway?
-  // if (parent === until || !dirContainsPath(until, parent)) return
+  // if (parent === until || !dirContains(until, parent)) return
 
   // Attempt to remove the directory (if it has contents, this will correctly fail and recursion will end)
   try {
@@ -70,7 +61,7 @@ async function pruneEmptyAncestors(file: string, until: string) {
     throw error
   }
 
-  await pruneEmptyAncestors(parent, until)
+  await deleteEmptyParents(parent, until)
 }
 
 /**
@@ -87,10 +78,10 @@ export class Directory {
   private watcher: null | SaneWatcher
   private primed: boolean
   // private files: Record<string, Buffer>
-  private files: Filemap
+  private files: Snapshot
   private mtimes: Record<string, number>
   private queuedOperations: Promise<any>
-  private subscriber: null | Promise<Filemap>
+  private subscriber: null | Promise<Snapshot>
 
   get path() {
     return this.absolutePath
@@ -118,7 +109,7 @@ export class Directory {
 
     if (
       options.force !== true &&
-      !dirContainsPath(process.cwd(), this.absolutePath)
+      !dirContains(process.cwd(), this.absolutePath)
     ) {
       throw new Error(
         'wire Directory: Cannot work outside CWD unless you set force:true'
@@ -152,12 +143,13 @@ export class Directory {
     const files: Record<string, Buffer> = {}
     const mtimes: Record<string, number> = {}
 
-    // let totalSize = 0 // TODO
+    // ensure we don't go over this.limit
+    let totalSize = 0
 
     // Walk to get all the files
     let index = 0
-    const paths = []
-    const contentsPromises = []
+    const paths: string[] = []
+    const contentsPromises: Promise<Buffer>[] = []
 
     const walker = asyncFolderWalker([this.absolutePath], {
       shaper: (fwData) => fwData,
@@ -175,6 +167,8 @@ export class Directory {
       // skip directories
       if (stat.isDirectory()) continue
 
+      totalSize += stat.size
+
       // capture the file path
       paths[index] = relname
 
@@ -187,9 +181,8 @@ export class Directory {
     const contents = await Promise.all(contentsPromises)
 
     // const files: Filemap = {}
-    for (let i = 0; i < paths.length; i++) {
-      files[paths[i]] = contents[i]
-    }
+    for (let i = 0; i < paths.length; i++)
+      files[paths[i]!] = contents[i] as unknown as Buffer
 
     // TODO: perf: instead of just waiting for the recursive readdir every time, try immediately looking up known files to see if they still exist.
 
@@ -200,9 +193,9 @@ export class Directory {
   }
 
   /**
-   * Queues function to be called after any other functions already in the queue.
+   * Helper method for `read`, `write` and `watch` calls to wait until past
    */
-  private queue<R>(queuableFunction: () => R | Promise<R>): Promise<R> {
+  private whenIdle<R>(queuableFunction: () => R | Promise<R>): Promise<R> {
     const result = Promise.resolve(this.queuedOperations).then(() =>
       queuableFunction()
     )
@@ -216,8 +209,8 @@ export class Directory {
    * Gets the contents of the directory as a filemap - from the in-memory cache
    * if possible, otherwise from disk.
    */
-  public read(incomingFiles?: Filemap): Promise<Filemap> {
-    return this.queue(async () => {
+  public read(incomingFiles?: Snapshot): Promise<Snapshot> {
+    return this.whenIdle(async () => {
       if (this.watcher) return this.files // TODO await first read from .watch()
 
       await this.reprime()
@@ -225,7 +218,7 @@ export class Directory {
       // merge over any incoming files (which may exist if this read() is being used as a transform)
       if (incomingFiles) {
         return {
-          ...castFilemap(incomingFiles),
+          ...castSnapshot(incomingFiles),
           ...this.files,
         }
       }
@@ -238,8 +231,8 @@ export class Directory {
   /**
    * Writes the given files to the directory on disk.
    */
-  public write(incomingFiles: Filemappish): Promise<Filemap> {
-    return this.queue(async () => {
+  public write(incomingFiles: Snapshottish): Promise<Snapshot> {
+    return this.whenIdle(async () => {
       if (this.watcher)
         throw new Error('wire: Refusing to write to watched directory')
 
@@ -291,7 +284,7 @@ export class Directory {
 
       // now all files are deleted, prune any empty directories in series
       for (const deletion of deletions) {
-        await pruneEmptyAncestors(
+        await deleteEmptyParents(
           pathUtil.resolve(this.absolutePath, deletion),
           this.absolutePath
         )
@@ -311,16 +304,15 @@ export class Directory {
    * Returns a promise that resolves after the first call to your subscriber (and after resolution of any promise returned by your subscriber, if applicable).
    */
   public watch(
-    onFilemapChange: (filemap: Filemap) => any
+    onFilemapChange: (filemap: Snapshot) => any
     // options?:
   ): Promise<void> {
-    return this.queue((): Promise<void> => {
+    return this.whenIdle((): Promise<void> => {
       if (this.watcher) throw new Error('Already watching')
 
-      return new Promise((resolve, reject) => {
+      return new Promise(async (resolve) => {
         const notify = debounce(() => {
-          const currentSubscriber: Promise<any> =
-            this.subscriber || Promise.resolve()
+          const currentSubscriber = this.subscriber || Promise.resolve()
 
           this.subscriber = currentSubscriber
             .then(() => onFilemapChange(this.files))
@@ -342,39 +334,40 @@ export class Directory {
         // create the watcher
         this.watcher = sane(this.absolutePath)
 
-        // read the initial contents from disk (reprime) then wait for changes
-        return this.reprime().then(async () => {
-          // call the callback once on startup with initial contents, and resolve this queue item once the callback is done
-          Promise.resolve(notify()).then(() => resolve())
+        // read the initial contents from disk
+        await this.reprime()
+        // then wait for changes
 
-          if (this.watcher === null) throw new Error('wire: no watcher')
+        // call the callback once on startup with initial contents, and resolve this queue item once the callback is done
+        Promise.resolve(notify()).then(() => resolve())
 
-          const handleWritten = async (path: string) => {
-            if (!this.match(path)) return
+        if (this.watcher === null) throw new Error('wire: no watcher')
 
-            this.log('write', this.logPrelude + path)
+        const handleWritten = async (path: string) => {
+          if (!this.match(path)) return
 
-            this.mtimes[path] = Date.now()
-            this.files[path] = await fs.readFile(
-              pathUtil.join(this.absolutePath, path)
-            )
-            notify()
-          }
+          this.log('write', this.logPrelude + path)
 
-          const handleRemoved = async (path: string) => {
-            if (!this.match(path)) return
+          this.mtimes[path] = Date.now()
+          this.files[path] = await fs.readFile(
+            pathUtil.join(this.absolutePath, path)
+          )
+          notify()
+        }
 
-            this.log('remove', this.logPrelude + path)
+        const handleRemoved = async (path: string) => {
+          if (!this.match(path)) return
 
-            delete this.files[path]
-            delete this.mtimes[path]
-            notify()
-          }
+          this.log('remove', this.logPrelude + path)
 
-          this.watcher.on('change', handleWritten)
-          this.watcher.on('add', handleWritten)
-          this.watcher.on('delete', handleRemoved)
-        })
+          delete this.files[path]
+          delete this.mtimes[path]
+          notify()
+        }
+
+        this.watcher.on('change', handleWritten)
+        this.watcher.on('add', handleWritten)
+        this.watcher.on('delete', handleRemoved)
       })
     })
   }
@@ -391,7 +384,7 @@ export class Directory {
    * Synchronous method to retrieve the files cache as it stands, without revalidating
    * against the disk. Throws if the directory has never been primed.
    */
-  public getCache(): Filemap {
+  public getCache(): Snapshot {
     if (!this.primed)
       throw new Error('wire: This Directory instance has never been primed.')
 
